@@ -1,0 +1,31 @@
+.boxed {
+  border: 1px black solid;
+  margin: 5px;
+  ]
+}
+
+body {
+  background: #36393f;
+  font-family: Lato;
+  font-size: 120%;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('Lato-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+a:link, a:visited, body {
+  color: white;
+}
+
+#setsArea {
+  padding: 5px;
+  white-space: pre-line;
+}
+
+.skillLabel {
+  margin-right: 5px;
+}
