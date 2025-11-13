@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Lynx Armor Set Search 1.1.0</title>
+<meta charset="UTF-8" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+<link
+  href="res/style.css"
+  type="text/css"
+  rel="stylesheet" />
+</head>
+<script src="fullData.js"></script>
+<body>
+  <h2>Armor set search for Monster Hunter Portable 3rd</h2>
+  <h5>
+    <a href="https://github.com/AthenaADP/MHP3-ASS">Data obtained from
+      Athena's A.S.S.</a>
+  </h5>
+  <hr>
+
+  <p>Your character:</p>
+  Gender:
+  <select id="genderCombo">
+    <option>Male</option>
+    <option>Female</option>
+  </select>
+  <br>
+  Weapon type:
+  <select id="weaponCombo">
+    <option>Blademaster</option>
+    <option>Gunner</option>
+  </select>
+  <br>
+  Weapon slots:
+  <input id="weaponSlots">
+  <hr>
+  Your talisman:
+  <br>
+  Skill 1:
+  <select id="skillOneCombo"></select>
+  <br>
+  Skill 1 value:
+  <input id="skillOneField">
+  <br>
+  Skill 2:
+  <select id="skillTwoCombo"></select>
+  <br>
+  Skill 2 value:
+  <input id="skillTwoField">
+
+  <br>
+  Slots:
+  <input id="slotsField">
+  <br>
+  <input
+    id="saveTalismanButton"
+    type="button"
+    value="Save">
+  <br>
+  Saved talismans:
+  <br>
+  <select id="savedTalismansCombobox">
+  </select>
+  <input
+    id="selectTalismanButton"
+    type="button"
+    value="Select">
+  <input
+    id="deleteTalismanButton"
+    type="button"
+    value="Delete">
+  <br>
+  <hr>
+  Add skills:
+  <div
+    class="boxed"
+    id="skillSelectionBox"></div>
+  Skillset name:
+  <input id="skillsLabelField">
+  <input
+    type="button"
+    id="saveSkillButton"
+    value="Save">
+  <br>
+  Saved skills:
+  <br>
+  <select id="savedSkillsCombobox">
+  </select>
+  <input
+    id="selectSkillsButton"
+    type="button"
+    value="Select">
+  <input
+    id="deleteSkillsButton"
+    type="button"
+    value="Delete">
+  <div
+    id="selectedSkillsDiv"
+    class="boxed">
+    <p>Selected skills:</p>
+  </div>
+  <input
+    id="searchButton"
+    type="button"
+    value="Search">
+  <br>
+  Candidates per slot(higher values = more results but longer times):
+  <input id="candidatesField">
+  <br>
+  Sort:
+  <select id="sortCombo">
+    <option>Most defense</option>
+    <option>Most free slots</option>
+    <option>Fewer decorations</option>
+  </select>
+
+  <hr>
+
+  <p>Results:</p>
+  <div
+    id="setsArea"
+    class="boxed"></div>
+
+  <a href="https://gitgud.io/stephenlynx/p3rd-lass">Source code</a>
+
+</body>
+<script src="display.js"></script>
+<script src="savedTalismans.js"></script>
+<script src="prepareForms.js"></script>
+<script src="savedSkills.js"></script>
+<script src="decorations.js"></script>
+<script src="search.js"></script>
+</html>
