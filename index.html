@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MHP3rd Armor Set Builder (Complete DB)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e5e7eb;
+        }
+
+        .mhp3-container {
+            border: 3px solid #000;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 100%);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .mhp3-input {
+            background: linear-gradient(180deg, #f3f4f6 0%, #d1d5db 100%);
+            border: 2px solid #374151;
+            border-radius: 9999px;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            font-weight: 700;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .mhp3-input:focus {
+            border-color: #000;
+            background: #fff;
+        }
+
+        .mhp3-btn {
+            background: linear-gradient(180deg, #e5e7eb 0%, #9ca3af 100%);
+            border: 2px solid #000;
+            border-radius: 9999px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: transform 0.1s;
+            cursor: pointer;
+        }
+
+        .mhp3-btn:active {
+            transform: scale(0.95);
+            background: #6b7280;
+        }
+
+        .result-box {
+            border: 2px solid #000;
+            border-radius: 15px;
+            background-color: #d1d5db;
+            min-height: 200px;
+        }
+
+        .result-card {
+            background-color: #f3f4f6;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #000;
+        }
+
+        .dashed-line {
+            border-bottom: 1px dashed #666;
+            margin: 8px 0;
+        }
+
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="p-4 flex justify-center min-h-screen">
+
+    <div class="mhp3-container w-full max-w-md p-6 flex flex-col gap-4">
+        
+        <!-- Header -->
+        <div class="text-center mb-2">
+            <h1 class="text-3xl font-black text-gray-900 leading-tight">MHP3RD ARMOR SET<br>BUILDER</h1>
+            <p class="text-xs font-bold text-gray-700 mt-1">Full Database Loaded</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="space-y-3">
+            <div class="relative">
+                <select id="gender" class="mhp3-input appearance-none">
+                    <option value="1">Male</option>
+                    <option value="2">Female</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">▼</div>
+            </div>
+            
+            <div class="relative">
+                <select id="hunterStyle" class="mhp3-input appearance-none">
+                    <option value="1">Blademaster</option>
+                    <option value="2">Gunner</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">▼</div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+                <label class="font-bold text-sm uppercase">Weapon Slots:</label>
+                <select id="weaponSlots" class="mhp3-input w-20 text-center">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="border-gray-600 border-2 rounded">
+
+        <!-- Talisman -->
+        <div>
+            <h3 class="font-bold text-gray-800 mb-2 uppercase text-sm">Talisman Add</h3>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+                <div class="col-span-2 relative">
+                    <select id="talismanSkill1" class="mhp3-input text-sm skill-selector">
+                        <option value="">- Skill 1 -</option>
+                    </select>
+                </div>
+                <input type="number" id="talismanVal1" class="mhp3-input text-center" placeholder="0">
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+                <div class="col-span-2 relative">
+                    <select id="talismanSkill2" class="mhp3-input text-sm skill-selector">
+                        <option value="">- Skill 2 -</option>
+                    </select>
+                </div>
+                <input type="number" id="talismanVal2" class="mhp3-input text-center" placeholder="0">
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <label class="font-bold text-sm uppercase flex-grow">Talisman Slot</label>
+                <select id="talismanSlots" class="mhp3-input w-24 text-center">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+        </div>
+
+        <hr class="border-gray-600 border-2 rounded">
+
+        <!-- Target Skills -->
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-gray-800 uppercase text-sm">Add Target Skill</h3>
+                <span id="skillCountDisplay" class="text-xs font-bold text-gray-600">0/7</span>
+            </div>
+            
+            <div id="targetSkillContainer" class="space-y-2 mb-3">
+                <!-- Dynamic Inputs -->
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="addTargetSkillInput()" id="btnAddSkill" class="mhp3-btn px-4 py-2 text-sm flex items-center justify-center gap-1">
+                    <span>+</span> Add Skill
+                </button>
+                <button onclick="removeLastSkill()" id="btnDelSkill" class="mhp3-btn px-4 py-2 text-sm text-red-800 bg-red-200">
+                    Delete
+                </button>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="grid grid-cols-2 gap-4 mt-2">
+            <button onclick="generateSets()" class="mhp3-btn py-3 text-lg hover:bg-white shadow-lg">SEARCH</button>
+            <div class="relative">
+                <select id="sortBy" class="mhp3-btn w-full h-full appearance-none text-center pl-4 pr-8 text-sm">
+                    <option value="defense">Sort: Defense</option>
+                    <option value="slots">Sort: Empty Slots</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-800">▼</div>
+            </div>
+        </div>
+
+        <!-- Result Area -->
+        <div id="resultsArea" class="result-box p-4 overflow-y-auto max-h-[500px] text-sm text-gray-700 mt-2">
+            <div class="text-center text-gray-500 italic mt-10">
+                Ready to generate.<br>Select skills and click Search.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. FULL SKILL DATABASE ---
+        const SKILL_DB = [
+            { name: "Attack Up [Sm]", tree: "Attack", points: 10 }, { name: "Attack Up [Med]", tree: "Attack", points: 15 }, { name: "Attack Up [Lg]", tree: "Attack", points: 20 },
+            { name: "Attack Down [Sm]", tree: "Attack", points: -10 }, { name: "Attack Down [Med]", tree: "Attack", points: -15 }, { name: "Attack Down [Lg]", tree: "Attack", points: -20 },
+            { name: "Reckless Abandon +1", tree: "Expert", points: 10 }, { name: "Reckless Abandon +2", tree: "Expert", points: 15 }, { name: "Reckless Abandon +3", tree: "Expert", points: 20 },
+            { name: "Reckless Abandon -1", tree: "Expert", points: -10 }, { name: "Reckless Abandon -2", tree: "Expert", points: -15 }, { name: "Reckless Abandon -3", tree: "Expert", points: -20 },
+            { name: "Sharp Sword", tree: "Sharpness", points: 10 }, { name: "Blunt", tree: "Sharpness", points: -10 },
+            { name: "Speed Sharpening", tree: "Sharpener", points: 10 }, { name: "Slow Sharpening", tree: "Sharpener", points: -10 },
+            { name: "Sharpness +1", tree: "Artisan", points: 15 },
+            { name: "Unsheathe Stun", tree: "PunishDraw", points: 10 }, { name: "Unsheathe Critical", tree: "Crit Draw", points: 10 },
+            { name: "Concentration", tree: "FastCharge", points: 10 }, { name: "Distraction", tree: "FastCharge", points: -10 },
+            { name: "ESP", tree: "Fencing", points: 10 }, { name: "Exploiter", tree: "Debilitate", points: 10 },
+            { name: "Ruiner", tree: "Slam", points: 10 }, { name: "Improved KO", tree: "KO", points: 10 }, { name: "Enfeebler", tree: "FatigueAtk", points: 10 },
+            { name: "Flute Expert", tree: "Horn", points: 10 }, { name: "Gunnery Master", tree: "Gunnery", points: 10 }, { name: "Gunnery King", tree: "Gunnery", points: 15 },
+            { name: "Unleashed +1", tree: "Awaken", points: 10 }, { name: "Unleashed +2", tree: "Awaken", points: 15 },
+            { name: "Adrenaline +1", tree: "Potential", points: 10 }, { name: "Adrenaline +2", tree: "Potential", points: 15 }, { name: "Worry", tree: "Potential", points: -10 },
+            { name: "Resilience", tree: "Adversity", points: 10 }, { name: "Load Up", tree: "Loading", points: 15 },
+            { name: "Rapid Shot +1", tree: "Rapid Fire", points: 10 }, { name: "Reload Speed +1", tree: "Reload Spd", points: 10 }, { name: "Reload Speed +2", tree: "Reload Spd", points: 15 }, { name: "Reload Speed +3", tree: "Reload Spd", points: 20 },
+            { name: "Recoil Reduction +1", tree: "Recoil", points: 10 }, { name: "Recoil Reduction +2", tree: "Recoil", points: 15 }, { name: "Recoil Reduction +3", tree: "Recoil", points: 20 },
+            { name: "Accuracy+1", tree: "Precision", points: 10 }, { name: "Accuracy+2", tree: "Precision", points: 15 },
+            { name: "NormalS/RapidBowUp", tree: "NormalS Up", points: 10 }, { name: "PierceS/PierceBowUp", tree: "PierceS Up", points: 10 }, { name: "PelletS/ScatterBowUp", tree: "PelletS Up", points: 10 },
+            { name: "Normal S All Add", tree: "NormalSAdd", points: 10 }, { name: "Pierce S LV1 Add", tree: "PierceSAdd", points: 10 }, { name: "Pierce S All Add", tree: "PierceSAdd", points: 15 },
+            { name: "Pellet S LV1 Add", tree: "PelletSAdd", points: 10 }, { name: "Pellet S All Add", tree: "PelletSAdd", points: 15 },
+            { name: "Crag S LV1 Add", tree: "Crag S Add", points: 10 }, { name: "Crag S All Add", tree: "Crag S Add", points: 15 },
+            { name: "Clust S LV1 Add", tree: "ClustS Add", points: 10 }, { name: "Clust S All Add", tree: "ClustS Add", points: 15 }, { name: "Cutter S Add", tree: "CutterSAdd", points: 10 },
+            { name: "Poison Coating Add", tree: "PoisonCAdd", points: 10 }, { name: "Parlysis Coating Add", tree: "ParalyCAdd", points: 10 }, { name: "Sleep Coating Add", tree: "SleepCAdd", points: 10 },
+            { name: "Power Coating Add", tree: "PowerCAdd", points: 10 }, { name: "Close Range Coating Add", tree: "RazorCAdd", points: 10 }, { name: "Fatigue Coating Add", tree: "FatigeCAdd", points: 10 },
+            { name: "Abnormal Status Atk +1", tree: "Status", points: 10 }, { name: "Abnormal Status Atk +2", tree: "Status", points: 15 }, { name: "Element Atk Up", tree: "Elemental", points: 10 },
+            { name: "Fire Element +1", tree: "Fire Atk", points: 10 }, { name: "Fire Element +2", tree: "Fire Atk", points: 15 },
+            { name: "Water Element +1", tree: "Water Atk", points: 10 }, { name: "Water Element +2", tree: "Water Atk", points: 15 },
+            { name: "Thunder Element +1", tree: "Thundr Atk", points: 10 }, { name: "Thunder Element +2", tree: "Thundr Atk", points: 15 },
+            { name: "Ice Element +1", tree: "Ice Attack", points: 10 }, { name: "Ice Element +2", tree: "Ice Attack", points: 15 },
+            { name: "Dragon Element +1", tree: "Dragon Atk", points: 10 }, { name: "Dragon Element +2", tree: "Dragon Atk", points: 15 },
+            { name: "Constitution +1", tree: "Constitutn", points: 10 }, { name: "Constitution +2", tree: "Constitutn", points: 15 },
+            { name: "Runner", tree: "Stamina", points: 10 }, { name: "Stamina Recov Up", tree: "Will Recov", points: 10 },
+            { name: "Hunger Halved", tree: "Hunger", points: 10 }, { name: "Hunger Negated", tree: "Hunger", points: 15 },
+            { name: "Evade +1", tree: "Evasion", points: 10 }, { name: "Evade +2", tree: "Evasion", points: 15 }, { name: "Evasion Up", tree: "Evade Dist", points: 15 },
+            { name: "Fast Sheathe", tree: "Sheathe", points: 10 }, { name: "Sneak", tree: "Sense", points: 10 },
+            { name: "Recovery Speed +1", tree: "Rec Speed", points: 10 }, { name: "Recovery Speed +2", tree: "Rec Speed", points: 15 },
+            { name: "Guard +1", tree: "Guard", points: 10 }, { name: "Guard +2", tree: "Guard", points: 15 }, { name: "Guard Inc", tree: "Guard Up", points: 10 }, { name: "Auto-Guard", tree: "Auto-Guard", points: 10 },
+            { name: "Divine Protection", tree: "Protection", points: 10 },
+            { name: "Poison Negated", tree: "Poison", points: 10 }, { name: "Parlysis Negated", tree: "Paralysis", points: 10 }, { name: "Sleep Negated", tree: "Sleep", points: 10 },
+            { name: "Stun Halved", tree: "Stun", points: 10 }, { name: "Stun Negated", tree: "Stun", points: 15 },
+            { name: "Mud/Snow Res", tree: "Mud/Snow", points: 10 }, { name: "Quake Res", tree: "Quake Res", points: 10 },
+            { name: "Wind Breaker", tree: "WindPress", points: 10 }, { name: "Wind Anchor", tree: "WindPress", points: 15 },
+            { name: "Antiseptic", tree: "Antiseptic", points: 10 }, { name: "Steal No Effect", tree: "Anti-Theft", points: 10 }, { name: "Blightproof", tree: "Blight Res", points: 10 }, { name: "Def Down Negate", tree: "Fortitude", points: 10 },
+            { name: "Earplug", tree: "HearProtct", points: 10 }, { name: "HighGradeEarplug", tree: "HearProtct", points: 15 },
+            { name: "Health +20", tree: "Health", points: 10 }, { name: "Health +50", tree: "Health", points: 15 },
+            { name: "Def Up (S)", tree: "Defense", points: 10 }, { name: "Def Up (M)", tree: "Defense", points: 15 }, { name: "Def Up (L)", tree: "Defense", points: 20 },
+            { name: "Fire Res (S)", tree: "Fire Res", points: 10 }, { name: "Fire Res (L)", tree: "Fire Res", points: 15 },
+            { name: "Water Res (S)", tree: "Water Res", points: 10 }, { name: "Water Res (L)", tree: "Water Res", points: 15 },
+            { name: "Thunder Res (S)", tree: "ThunderRes", points: 10 }, { name: "Thunder Res (L)", tree: "ThunderRes", points: 15 },
+            { name: "Ice Res (S)", tree: "Ice Res", points: 10 }, { name: "Ice Res (L)", tree: "Ice Res", points: 15 },
+            { name: "Dragon Res (S)", tree: "Dragon Res", points: 10 }, { name: "Dragon Res (L)", tree: "Dragon Res", points: 15 },
+            { name: "Wide Area +1", tree: "Wide Area", points: 10 }, { name: "Wide Area +2", tree: "Wide Area", points: 20 },
+            { name: "Bombardier", tree: "BombStrUp", points: 10 }, { name: "Trap Master", tree: "SpeedSetup", points: 10 }, { name: "Trnquilizr Guru", tree: "Perception", points: 10 },
+            { name: "Detect", tree: "Psychic", points: 10 }, { name: "Autotracker", tree: "Psychic", points: 15 }, { name: "DungBombExpert", tree: "DungMaster", points: 10 },
+            { name: "Recovery Up", tree: "Rec Level", points: 10 }, { name: "Item Use Up", tree: "LastingPwr", points: 10 }, { name: "Filled Up", tree: "Gluttony", points: 10 }, { name: "Picky Eater", tree: "Gluttony", points: 15 },
+            { name: "Quick Eating +1", tree: "Eating", points: 10 }, { name: "Quick Eating +2", tree: "Eating", points: 15 }, { name: "Huntsman's Life", tree: "Huntsman", points: 10 }, { name: "Backpacking Expert", tree: "Backpackng", points: 10 },
+            { name: "Heat Cancel", tree: "Heat Res", points: 10 }, { name: "Cold Eliminate", tree: "Cold Res", points: 10 },
+            { name: "Gathering +1", tree: "Gathering", points: 10 }, { name: "Gathering +2", tree: "Gathering", points: 15 }, { name: "Hi-SpdGathering", tree: "HiSpdGathr", points: 10 },
+            { name: "Spirit's Whim", tree: "Whim", points: 10 }, { name: "Divine Whim", tree: "Whim", points: 15 },
+            { name: "Good Luck", tree: "Fate", points: 10 }, { name: "Luck Booster", tree: "Fate", points: 15 },
+            { name: "Carving Expert", tree: "Carving", points: 15 }, { name: "Rewards Expert", tree: "Rewards", points: 10 }, { name: "Rewards Celeb", tree: "Rewards", points: 15 },
+            { name: "Combine Success +20%", tree: "Combo Rate", points: 10 }, { name: "Combine Success+45%", tree: "Combo Rate", points: 15 },
+            { name: "Bullet Limit", tree: "Shot Mix", points: 10 }, { name: "Torso Inc", tree: "Torso Inc", points: 0 }
+        ];
+
+        // --- 2. DECORATION DATABASE (Processed from your input) ---
+        // I have parsed the slots from the name brackets [x] 
+        const DECORATIONS = [
+            {name: "SteadfastJwl[1]", slots: 1, skills: {"Stun": 1, "Paralysis": -1}},
+            {name: "VigilanceJwl[1]", slots: 1, skills: {"Stun": 2}},
+            {name: "ParalysisJwl[1]", slots: 1, skills: {"Paralysis": 1, "Poison": -1}},
+            {name: "ParalysisJwl[2]", slots: 2, skills: {"Paralysis": 3, "Poison": -1}},
+            {name: "Pep Jewel[1]", slots: 1, skills: {"Sleep": 1, "Mud/Snow": -1}},
+            {name: "Pep Jewel[2]", slots: 2, skills: {"Sleep": 3, "Mud/Snow": -1}},
+            {name: "Antidote Jwl[1]", slots: 1, skills: {"Poison": 1, "Stun": -1}},
+            {name: "Antidote Jwl[2]", slots: 2, skills: {"Poison": 3, "Stun": -1}},
+            {name: "FortitudeJwl[1]", slots: 1, skills: {"Fortitude": 2}},
+            {name: "Alarm Jewel[1]", slots: 1, skills: {"Anti-Theft": 2}},
+            {name: "Teflon Jewel[1]", slots: 1, skills: {"Mud/Snow": 1, "Sleep": -1}},
+            {name: "LubricantJwl[1]", slots: 1, skills: {"Mud/Snow": 2}},
+            {name: "RetroviralJwl[1]", slots: 1, skills: {"Antiseptic": 1, "Sense": -1}},
+            {name: "AntiviralJwl[1]", slots: 1, skills: {"Antiseptic": 2}},
+            {name: "Anchor Jewel[1]", slots: 1, skills: {"Quake Res": 1, "Sleep": -1}},
+            {name: "Tectonic Jwl[1]", slots: 1, skills: {"Quake Res": 2}},
+            {name: "Cooling Jwl[1]", slots: 1, skills: {"Heat Res": 2}},
+            {name: "Warming Jwl[1]", slots: 1, skills: {"Cold Res": 2}},
+            {name: "Earplug Jwl[1]", slots: 1, skills: {"HearProtct": 1, "Protection": -1}},
+            {name: "Earplug Jwl[3]", slots: 3, skills: {"HearProtct": 4, "Protection": -2}},
+            {name: "WindpressJwl[1]", slots: 1, skills: {"WindPress": 1, "Fate": -1}},
+            {name: "WindpressJwl[2]", slots: 2, skills: {"WindPress": 3, "Fate": -1}},
+            {name: "Attack Jewel[1]", slots: 1, skills: {"Attack": 1, "Defense": -1}},
+            {name: "Attack Jewel[2]", slots: 2, skills: {"Attack": 3, "Defense": -1}},
+            {name: "Attack Jewel[3]", slots: 3, skills: {"Attack": 5, "Defense": -1}},
+            {name: "Expert Jewel[1]", slots: 1, skills: {"Expert": 1, "Dragon Res": -1}},
+            {name: "Expert Jewel[2]", slots: 2, skills: {"Expert": 3, "Dragon Res": -1}},
+            {name: "Expert Jewel[3]", slots: 3, skills: {"Expert": 5, "Dragon Res": -1}},
+            {name: "SpcialAtkJwl[1]", slots: 1, skills: {"Status": 1, "Elemental": -1}},
+            {name: "SpcialAtkJwl[2]", slots: 2, skills: {"Status": 3, "Elemental": -1}},
+            {name: "Element Jwl[1]", slots: 1, skills: {"Elemental": 1, "Status": -1}},
+            {name: "Element Jwl[3]", slots: 3, skills: {"Elemental": 4, "Status": -2}},
+            {name: "Fire Atk Jwl[1]", slots: 1, skills: {"Fire Atk": 1, "Water Atk": -1}},
+            {name: "Fire Atk Jwl[2]", slots: 2, skills: {"Fire Atk": 3, "Water Atk": -1}},
+            {name: "WaterAtk Jwl[1]", slots: 1, skills: {"Water Atk": 1, "Thundr Atk": -1}},
+            {name: "WaterAtk Jwl[2]", slots: 2, skills: {"Water Atk": 3, "Thundr Atk": -1}},
+            {name: "ThndrAtk Jwl[1]", slots: 1, skills: {"Thundr Atk": 1, "Ice Attack": -1}},
+            {name: "ThndrAtk Jwl[2]", slots: 2, skills: {"Thundr Atk": 3, "Ice Attack": -1}},
+            {name: "Ice Atk Jwl[1]", slots: 1, skills: {"Ice Attack": 1, "Fire Atk": -1}},
+            {name: "Ice Atk Jwl[2]", slots: 2, skills: {"Ice Attack": 3, "Fire Atk": -1}},
+            {name: "DragnAtk Jwl[1]", slots: 1, skills: {"Dragon Atk": 1, "Status": -1}},
+            {name: "DragnAtk Jwl[2]", slots: 2, skills: {"Dragon Atk": 3, "Status": -1}},
+            {name: "DeblitateJwl[1]", slots: 1, skills: {"Debilitate": 1, "Health": -1}},
+            {name: "DeblitateJwl[3]", slots: 3, skills: {"Debilitate": 4, "Health": -2}},
+            {name: "Slam Jewel[1]", slots: 1, skills: {"Slam": 1, "Expert": -1}},
+            {name: "Slam Jewel[3]", slots: 3, skills: {"Slam": 4, "Expert": -2}},
+            {name: "Ammo Box Jwl[1]", slots: 1, skills: {"Loading": 1, "Reload Spd": -1}},
+            {name: "Ammo Box Jwl[3]", slots: 3, skills: {"Loading": 4, "Reload Spd": -2}},
+            {name: "FastChargJwl[1]", slots: 1, skills: {"FastCharge": 1, "Constitutn": -1}},
+            {name: "FastChargJwl[3]", slots: 3, skills: {"FastCharge": 4, "Constitutn": -2}},
+            {name: "Unlock Jewel[1]", slots: 1, skills: {"Awaken": 1, "Sense": -1}},
+            {name: "Unlock Jewel[2]", slots: 2, skills: {"Awaken": 3, "Sense": -1}},
+            {name: "KO Jewel[1]", slots: 1, skills: {"KO": 1, "FastCharge": -1}},
+            {name: "KO Jewel[2]", slots: 2, skills: {"KO": 3, "FastCharge": -1}},
+            {name: "FatigeAtkJwl[1]", slots: 1, skills: {"FatigueAtk": 1, "Stamina": -1}},
+            {name: "FatigeAtkJwl[2]", slots: 2, skills: {"FatigueAtk": 3, "Stamina": -1}},
+            {name: "PotentialJwl[1]", slots: 1, skills: {"Potential": 1, "Protection": -1}},
+            {name: "PotentialJwl[2]", slots: 2, skills: {"Potential": 3, "Protection": -1}},
+            {name: "AdversityJwl[1]", slots: 1, skills: {"Adversity": 1, "Rec Level": -1}},
+            {name: "AdversityJwl[2]", slots: 2, skills: {"Adversity": 3, "Rec Level": -1}},
+            {name: "BombrdierJwl[1]", slots: 1, skills: {"BombStrUp": 2}},
+            {name: "Fife Jewel[1]", slots: 1, skills: {"Horn": 2}},
+            {name: "Howitzer Jwl[1]", slots: 1, skills: {"Gunnery": 2}},
+            {name: "Defense Jwl[1]", slots: 1, skills: {"Defense": 1, "Attack": -1}},
+            {name: "Defense Jwl[2]", slots: 2, skills: {"Defense": 3, "Attack": -1}},
+            {name: "Blight Jewel[1]", slots: 1, skills: {"Blight Res": 1, "Health": -1}},
+            {name: "Blight Jewel[3]", slots: 3, skills: {"Blight Res": 4, "Health": -2}},
+            {name: "Inferno Jwl[1]", slots: 1, skills: {"Fire Res": 1, "Water Res": -1}},
+            {name: "Crimson Jwl[1]", slots: 1, skills: {"Fire Res": 2}},
+            {name: "Stream Jewel[1]", slots: 1, skills: {"Water Res": 1, "ThunderRes": -1}},
+            {name: "Torrent Jwl[1]", slots: 1, skills: {"Water Res": 2}},
+            {name: "Thunder Jwl[1]", slots: 1, skills: {"ThunderRes": 1, "Ice Res": -1}},
+            {name: "LightningJwl[1]", slots: 1, skills: {"ThunderRes": 2}},
+            {name: "Freeze Jewel[1]", slots: 1, skills: {"Ice Res": 1, "Fire Res": -1}},
+            {name: "GlacierJwl[1]", slots: 1, skills: {"Ice Res": 2}},
+            {name: "Slayer Jewel[1]", slots: 1, skills: {"Dragon Res": 1, "Poison": -1}},
+            {name: "Extinction Jwl[1]", slots: 1, skills: {"Dragon Res": 2}},
+            {name: "Protectn Jwl[1]", slots: 1, skills: {"Protection": 1}},
+            {name: "DvnePrtctJwl[1]", slots: 1, skills: {"Protection": 2}},
+            {name: "Health Jewel[1]", slots: 1, skills: {"Health": 2}},
+            {name: "FeelGood Jwl[1]", slots: 1, skills: {"Rec Speed": 1, "Eating": -1}},
+            {name: "FeelGood Jwl[2]", slots: 2, skills: {"Rec Speed": 3, "Eating": -1}},
+            {name: "Cure Jewel[1]", slots: 1, skills: {"Rec Level": 1, "Rec Speed": -1}},
+            {name: "Cure Jewel[2]", slots: 2, skills: {"Rec Level": 3, "Rec Speed": -1}},
+            {name: "Evade Jewel[1]", slots: 1, skills: {"Evasion": 1, "Health": -1}},
+            {name: "Evade Jewel[2]", slots: 2, skills: {"Evasion": 3, "Health": -1}},
+            {name: "Jump Jewel[1]", slots: 1, skills: {"Evade Dist": 1, "Health": -1}},
+            {name: "Jump Jewel[3]", slots: 3, skills: {"Evade Dist": 4, "Health": -2}},
+            {name: "Sheathe Jwl[1]", slots: 1, skills: {"Sheathe": 1, "Sharpener": -1}},
+            {name: "Sheathe Jwl[2]", slots: 2, skills: {"Sheathe": 3, "Sharpener": -1}},
+            {name: "TrapMastrJwl[1]", slots: 1, skills: {"SpeedSetup": 2}},
+            {name: "FastEaterJwl[1]", slots: 1, skills: {"Eating": 1, "Rec Level": -1}},
+            {name: "FastEaterJwl[3]", slots: 3, skills: {"Eating": 4, "Rec Level": -2}},
+            {name: "Marathon Jwl[1]", slots: 1, skills: {"Stamina": 1, "Hunger": -1}},
+            {name: "Marathon Jwl[3]", slots: 3, skills: {"Stamina": 4, "Hunger": -2}},
+            {name: "Constutn Jwl[1]", slots: 1, skills: {"Constitutn": 1, "Stamina": -1}},
+            {name: "Constutn Jwl[2]", slots: 2, skills: {"Constitutn": 3, "Stamina": -1}},
+            {name: "WillRecovJwl[1]", slots: 1, skills: {"Will Recov": 1, "Evasion": -1}},
+            {name: "WillRecovJwl[2]", slots: 2, skills: {"Will Recov": 3, "Evasion": -1}},
+            {name: "PickyEatrJwl[1]", slots: 1, skills: {"Hunger": 2}},
+            {name: "Fatso Jewel[1]", slots: 1, skills: {"Gluttony": 2}},
+            {name: "Fate Jewel[1]", slots: 1, skills: {"Fate": 1, "Whim": -1}},
+            {name: "Fate Jewel[3]", slots: 3, skills: {"Fate": 4, "Whim": -2}},
+            {name: "Rewards Jwl[1]", slots: 1, skills: {"Rewards": 1, "Fate": -1}},
+            {name: "Rewards Jwl[3]", slots: 3, skills: {"Rewards": 4, "Fate": -2}},
+            {name: "HidecutterJwl[1]", slots: 1, skills: {"Carving": 1, "Fate": -1}},
+            {name: "HidecutterJwl[3]", slots: 3, skills: {"Carving": 4, "Fate": -2}},
+            {name: "BackpckngJwl[1]", slots: 1, skills: {"Backpackng": 2}},
+            {name: "GatherngJwl[1]", slots: 1, skills: {"Gathering": 2}},
+            {name: "GrabnDashJwl[1]", slots: 1, skills: {"HiSpdGathr": 2}},
+            {name: "GoodLuck Jwl[1]", slots: 1, skills: {"Whim": 2}},
+            {name: "FriendshipJwl[1]", slots: 1, skills: {"Wide Area": 1, "Sense": -1}},
+            {name: "FriendshipJwl[2]", slots: 2, skills: {"Wide Area": 3, "Sense": -1}},
+            {name: "Psychic Jwl[1]", slots: 1, skills: {"Psychic": 2}},
+            {name: "ProfessorJwl[1]", slots: 1, skills: {"Combo Rate": 2}},
+            {name: "Armory Jewel[1]", slots: 1, skills: {"Shot Mix": 2}},
+            {name: "StayngPwrJwl[1]", slots: 1, skills: {"LastingPwr": 2}},
+            {name: "Perceptn Jwl[1]", slots: 1, skills: {"Perception": 2}},
+            {name: "Dungmastr Jwl[1]", slots: 1, skills: {"DungMaster": 2}},
+            {name: "Huntsman Jwl[1]", slots: 1, skills: {"Huntsman": 2}},
+            {name: "Ninja Jewel[1]", slots: 1, skills: {"Sense": 2}},
+            {name: "Artisan Jwl[1]", slots: 1, skills: {"Artisan": 1, "Sharpness": -1}},
+            {name: "Artisan Jwl[3]", slots: 3, skills: {"Artisan": 4, "Sharpness": -2}},
+            {name: "Fencing Jwl[1]", slots: 1, skills: {"Fencing": 1, "Artisan": -1}},
+            {name: "Fencing Jwl[3]", slots: 3, skills: {"Fencing": 4, "Artisan": -2}},
+            {name: "Razor Jewel[1]", slots: 1, skills: {"Sharpness": 1, "Artisan": -1}},
+            {name: "Razor Jewel[3]", slots: 3, skills: {"Sharpness": 4, "Artisan": -2}},
+            {name: "CritDraw Jwl[1]", slots: 1, skills: {"Crit Draw": 1, "Expert": -1}},
+            {name: "CritDraw Jwl[2]", slots: 2, skills: {"Crit Draw": 3, "Expert": -1}},
+            {name: "PunshDrw Jwl[1]", slots: 1, skills: {"PunishDraw": 1, "Sharpness": -1}},
+            {name: "PunshDrw Jwl[3]", slots: 3, skills: {"PunishDraw": 4, "Sharpness": -2}},
+            {name: "IronWall Jwl[1]", slots: 1, skills: {"Guard": 1, "Constitutn": -1}},
+            {name: "IronWall Jwl[2]", slots: 2, skills: {"Guard": 3, "Constitutn": -1}},
+            {name: "HardWall Jwl[1]", slots: 1, skills: {"Guard Up": 1, "Stamina": -1}},
+            {name: "HardWall Jwl[2]", slots: 2, skills: {"Guard Up": 3, "Stamina": -1}},
+            {name: "Grinder Jwl[1]", slots: 1, skills: {"Sharpener": 2}},
+            {name: "StrngShotJwl[1]", slots: 1, skills: {"NormalS Up": 1, "Recoil": -1}},
+            {name: "StrngShotJwl[3]", slots: 3, skills: {"NormalS Up": 4, "Recoil": -2}},
+            {name: "Pierce Jewel[1]", slots: 1, skills: {"PierceS Up": 1, "Recoil": -1}},
+            {name: "Pierce Jewel[3]", slots: 3, skills: {"PierceS Up": 4, "Recoil": -2}},
+            {name: "Pellet Jewel[1]", slots: 1, skills: {"PelletS Up": 1, "Recoil": -1}},
+            {name: "Pellet Jewel[3]", slots: 3, skills: {"PelletS Up": 4, "Recoil": -2}},
+            {name: "ShotBonusJwl[1]", slots: 1, skills: {"NormalSAdd": 1, "Reload Spd": -1}},
+            {name: "ShotBonusJwl[2]", slots: 2, skills: {"NormalSAdd": 3, "Reload Spd": -1}},
+            {name: "PrceBonusJwl[1]", slots: 1, skills: {"PierceSAdd": 2}},
+            {name: "PlltBonusJwl[1]", slots: 1, skills: {"PelletSAdd": 2}},
+            {name: "BombBonusJwl[1]", slots: 1, skills: {"Crag S Add": 2}},
+            {name: "ScttrBnusJwl[1]", slots: 1, skills: {"ClustS Add": 1, "Reload Spd": -1}},
+            {name: "CuttrBnus Jwl[1]", slots: 1, skills: {"CutterSAdd": 2}},
+            {name: "RapidFireJwl[1]", slots: 1, skills: {"Rapid Fire": 1, "Reload Spd": -1}},
+            {name: "RapidFireJwl[3]", slots: 3, skills: {"Rapid Fire": 4, "Reload Spd": -2}},
+            {name: "HighSpeedJwl[1]", slots: 1, skills: {"Reload Spd": 1, "Recoil": -1}},
+            {name: "HighSpeedJwl[2]", slots: 2, skills: {"Reload Spd": 3, "Recoil": -1}},
+            {name: "Recoil Jewel[1]", slots: 1, skills: {"Recoil": 1, "Reload Spd": -1}},
+            {name: "Recoil Jewel[3]", slots: 3, skills: {"Recoil": 4, "Reload Spd": -2}},
+            {name: "Sniper Jewel[1]", slots: 1, skills: {"Precision": 2}},
+            {name: "Para Ct Jwl[1]", slots: 1, skills: {"ParalyCAdd": 1, "Attack": -1}},
+            {name: "Para Ct Jwl[2]", slots: 2, skills: {"ParalyCAdd": 3, "Attack": -1}},
+            {name: "Sleep Ct Jwl[1]", slots: 1, skills: {"SleepCAdd": 2}},
+            {name: "PoisonCt Jwl[1]", slots: 1, skills: {"PoisonCAdd": 2}},
+            {name: "Power Ct Jwl[1]", slots: 1, skills: {"PowerCAdd": 1, "Expert": -1}},
+            {name: "Power Ct Jwl[2]", slots: 2, skills: {"PowerCAdd": 3, "Expert": -1}},
+            {name: "ClsRngCt Jwl[1]", slots: 1, skills: {"RazorCAdd": 2}},
+            {name: "FatigeCt Jwl[1]", slots: 1, skills: {"FatigeCAdd": 2}}
+        ];
+
+        // Armor Data (Sample Set retained for functionality)
+        const ARMOR_DB = {
+            helm: [
+                {name:"Yukumo Hat", g:0, t:0, s:0, def:21, skills:{"Protection":2, "Whim":2, "Expert":2}},
+                {name:"Leather Helm", g:0, t:0, s:1, def:21, skills:{"HiSpdGathr":2, "Gathering":2, "Whim":3}},
+                {name:"Chain Helm", g:0, t:0, s:1, def:22, skills:{"Health":2, "Combo Rate":4, "Shot Mix":1}},
+                {name:"Hunter's Helm", g:0, t:0, s:1, def:25, skills:{"Huntsman":2, "Psychic":2, "SpeedSetup":3, "Poison":-2}},
+                {name:"Hunter's Cap", g:0, t:0, s:1, def:16, skills:{"Huntsman":4, "Psychic":4, "SpeedSetup":2, "Poison":-1}},
+                {name:"Bone Helm", g:0, t:0, s:1, def:27, skills:{"Horn":1, "Gathering":3, "KO":2, "Sleep":-3}},
+                {name:"Bone Cap", g:0, t:0, s:1, def:17, skills:{"Horn":3, "Gathering":3, "KO":4, "Sleep":-1}},
+                {name:"Alloy Helm", g:0, t:0, s:1, def:27, skills:{"WindPress":2, "Expert":1, "Sharpener":3, "Gathering":-3}},
+                {name:"Alloy Cap", g:0, t:0, s:1, def:17, skills:{"PelletS Up":3, "Reload Spd":3, "PelletSAdd":3, "Gathering":-2}},
+                {name:"Bnahabra Helm", g:0, t:0, s:1, def:29, skills:{"Status":1, "Sheathe":1, "Sense":4, "Attack":-3}},
+                {name:"Bnahabra Cap", g:0, t:0, s:1, def:18, skills:{"Status":3, "Sheathe":3, "Sense":4, "Attack":-1}},
+                {name:"Rhenoplos Helm", g:0, t:0, s:1, def:29, skills:{"Will Recov":2, "Gunnery":1, "Mud/Snow":3, "Ice Res":-3}},
+                {name:"Rhenoplos Cap", g:0, t:0, s:1, def:18, skills:{"Will Recov":4, "Gunnery":2, "Precision":4, "Ice Res":-1}},
+                {name:"Jaggi Helm", g:0, t:0, s:1, def:31, skills:{"Attack":2, "Perception":2, "Rec Speed":2, "LastingPwr":-3}},
+                {name:"Jaggi Cap", g:0, t:0, s:1, def:19, skills:{"Attack":3, "Perception":3, "Rec Speed":4, "LastingPwr":-1}},
+                {name:"Aoashira Helm", g:0, t:0, s:1, def:31, skills:{"Gluttony":1, "Defense":2, "Stun":3, "Paralysis":-3}},
+                {name:"Aoashira Cap", g:0, t:0, s:1, def:19, skills:{"Gluttony":3, "Defense":3, "Stun":3, "Paralysis":-2}},
+                {name:"Froggi Helm", g:0, t:0, s:1, def:33, skills:{"Constitutn":2, "Perception":2, "Poison":2, "Stun":-3}},
+                {name:"Froggi Cap", g:0, t:0, s:1, def:20, skills:{"Constitutn":4, "Perception":4, "Poison":2, "Stun":-1}},
+                {name:"Urukusu Helm", g:0, t:0, s:2, def:33, skills:{"Evasion":2, "Ice Res":4, "Cold Res":2, "Heat Res":-3}},
+                {name:"Urukusu Cap", g:0, t:0, s:2, def:20, skills:{"Evasion":4, "Ice Res":4, "Cold Res":4, "Heat Res":-1}},
+                {name:"Qurupeco Helm", g:0, t:0, s:1, def:31, skills:{"Wide Area":1, "Rec Level":3, "Eating":-3, "Horn":2}},
+                {name:"Qurupeco Cap", g:0, t:0, s:1, def:19, skills:{"Wide Area":4, "Rec Level":4, "Eating":-1, "Horn":2}},
+                {name:"Ludroth Helm", g:0, t:0, s:1, def:33, skills:{"Stamina":2, "Hunger":3, "Water Atk":1, "ThunderRes":-3}},
+                {name:"Ludroth Cap", g:0, t:0, s:1, def:20, skills:{"Stamina":4, "Hunger":3, "Water Atk":3, "ThunderRes":-1}},
+                {name:"Barroth Helm", g:0, t:0, s:1, def:35, skills:{"Guard":3, "KO":2, "Defense":1, "Constitutn":-3}},
+                {name:"Barroth Cap", g:0, t:0, s:1, def:21, skills:{"NormalS Up":3, "Precision":3, "Defense":3, "Constitutn":-2}},
+                {name:"Ingot Helm", g:0, t:0, s:2, def:39, skills:{"WindPress":2, "Thundr Atk":2, "Sharpener":2, "Whim":-3}},
+                {name:"Ingot Cap", g:0, t:0, s:2, def:23, skills:{"PelletS Up":3, "Thundr Atk":2, "Reload Spd":4, "Whim":-2}},
+                {name:"Baggi Helm", g:0, t:0, s:2, def:35, skills:{"Attack":1, "Ice Attack":2, "Rec Speed":3, "Fire Res":-3}},
+                {name:"Baggi Cap", g:0, t:0, s:2, def:21, skills:{"Attack":4, "Ice Attack":2, "Rec Speed":4, "Fire Res":-1}},
+                {name:"Ranguro Helm", g:0, t:0, s:2, def:35, skills:{"Evasion":3, "Fire Res":1, "Heat Res":2, "Cold Res":-3}},
+                {name:"Ranguro Cap", g:0, t:0, s:2, def:21, skills:{"Evasion":5, "Fire Res":2, "Heat Res":3, "Cold Res":-1}},
+                {name:"Rathian Helm", g:0, t:0, s:2, def:37, skills:{"Health":4, "Protection":1, "Fire Atk":1, "Rec Speed":-3}},
+                {name:"Rathian Cap", g:0, t:0, s:2, def:22, skills:{"Health":5, "Protection":3, "Fire Atk":2, "Rec Speed":-1}},
+                {name:"Hapuru Helm", g:0, t:0, s:2, def:37, skills:{"Eating":2, "Water Atk":4, "Gluttony":2, "Hunger":-3}},
+                {name:"Hapuru Cap", g:0, t:0, s:2, def:22, skills:{"Eating":4, "Water Atk":3, "Gluttony":4, "Hunger":-2}},
+                {name:"Nebula Helm", g:0, t:0, s:2, def:37, skills:{"Status":3, "ThunderRes":2, "Stun":1, "Health":-3}},
+                {name:"Nebula Cap", g:0, t:0, s:2, def:22, skills:{"Status":4, "ThunderRes":2, "Stun":4, "Health":-1}},
+                {name:"Narga Helm", g:0, t:0, s:2, def:39, skills:{"Evade Dist":2, "Will Recov":2, "Sense":2, "Attack":-3}},
+                {name:"Narga Cap", g:0, t:0, s:2, def:23, skills:{"Evade Dist":4, "Will Recov":3, "Sense":2, "Attack":-2}},
+                {name:"Barioth Helm", g:0, t:0, s:2, def:39, skills:{"Stamina":2, "Constitutn":1, "Ice Attack":3, "Will Recov":-3}},
+                {name:"Barioth Cap", g:0, t:0, s:2, def:23, skills:{"Stamina":4, "Constitutn":5, "Ice Attack":1, "Will Recov":-1}},
+                {name:"Rathalos Helm", g:0, t:0, s:3, def:41, skills:{"Debilitate":1, "Attack":4, "Fire Atk":1, "Rec Level":-3}},
+                {name:"Rathalos Cap", g:0, t:0, s:3, def:24, skills:{"Debilitate":3, "Attack":2, "Fire Atk":5, "Rec Level":-1}},
+                {name:"Uragaan Helm", g:0, t:0, s:2, def:41, skills:{"PunishDraw":3, "Defense":1, "Fire Res":3, "Water Res":-2}},
+                {name:"Uragaan Cap", g:0, t:0, s:2, def:24, skills:{"PierceS Up":4, "Defense":5, "Fire Res":1, "Water Res":-1}},
+                {name:"Jinouga Helm", g:0, t:0, s:3, def:41, skills:{"Awaken":1, "Thundr Atk":1, "Sharpness":3, "Sense":-2}},
+                {name:"Jinouga Cap", g:0, t:0, s:3, def:24, skills:{"Awaken":2, "Thundr Atk":2, "NormalS Up":3, "Sense":-2}},
+                {name:"Diablos Helm", g:0, t:0, s:3, def:43, skills:{"Crit Draw":3, "FatigueAtk":2, "Quake Res":1, "Status":-3}},
+                {name:"Diablos Cap", g:0, t:0, s:3, def:25, skills:{"PierceS Up":3, "NormalSAdd":4, "FatigueAtk":2, "Status":-2}},
+                {name:"Tigrex Helm", g:0, t:0, s:3, def:43, skills:{"HearProtct":1, "Psychic":2, "Gluttony":6, "Protection":-2}},
+                {name:"Tigrex Cap", g:0, t:0, s:3, def:25, skills:{"HearProtct":3, "Psychic":5, "Gluttony":4, "Protection":-1}},
+                {name:"Agnaktor Helm", g:0, t:0, s:3, def:43, skills:{"Guard":2, "Sharpness":3, "Expert":2, "Potential":-2}},
+                {name:"Agnaktor Cap", g:0, t:0, s:3, def:25, skills:{"NormalS Up":2, "PierceSAdd":4, "Precision":3, "Potential":-2}},
+                {name:"Doboru Helm", g:0, t:0, s:3, def:43, skills:{"Slam":1, "Potential":2, "Attack":3, "Expert":-3}},
+                {name:"Doboru Cap", g:0, t:0, s:3, def:25, skills:{"Slam":3, "Potential":2, "Recoil":4, "Expert":-2}},
+                {name:"Guild Bard Tricorne", g:1, t:0, s:3, def:39, skills:{"Rewards":1, "Perception":2, "Wide Area":1, "Fate":-3}},
+                {name:"Guild Bard Hat", g:1, t:0, s:3, def:23, skills:{"Rewards":4, "Perception":1, "Wide Area":2, "Fate":-2}},
+                {name:"Scholar Hood", g:2, t:0, s:3, def:39, skills:{"Rewards":1, "Perception":2, "Wide Area":1, "Fate":-3}},
+                {name:"Scholar Beret", g:2, t:0, s:3, def:23, skills:{"Rewards":4, "Perception":1, "Wide Area":2, "Fate":-2}},
+                {name:"Nightmare Furore", g:0, t:0, s:2, def:35, skills:{"FastCharge":1, "LastingPwr":2, "SpeedSetup":1, "Guard":-3}},
+                {name:"Nightmare Furore", g:0, t:0, s:2, def:35, skills:{"FastCharge":1, "LastingPwr":2, "SpeedSetup":1, "Guard":-3}},
+                {name:"Nightmare Brume", g:0, t:0, s:2, def:21, skills:{"FastCharge":3, "LastingPwr":2, "SpeedSetup":3, "Precision":-1}},
+                {name:"Nightmare Brume", g:0, t:0, s:2, def:21, skills:{"FastCharge":3, "LastingPwr":2, "SpeedSetup":3, "Precision":-1}},
+                {name:"Viking Helm", g:0, t:0, s:1, def:33, skills:{"Sharpness":2, "Rec Speed":1, "Water Res":4, "Sharpener":-2}},
+                {name:"Viking Cap", g:0, t:0, s:1, def:20, skills:{"NormalS Up":2, "Rec Speed":3, "Water Res":4, "Reload Spd":-2}},
+                {name:"Rouage Testa", g:1, t:0, s:3, def:37, skills:{"HearProtct":2, "Expert":1, "ThunderRes":3, "Protection":-3}},
+                {name:"Rouage Caput", g:1, t:0, s:3, def:22, skills:{"HearProtct":3, "Expert":5, "ThunderRes":1, "Protection":-2}},
+                {name:"Falmer Testa", g:2, t:0, s:3, def:37, skills:{"HearProtct":2, "Expert":1, "ThunderRes":3, "Protection":-3}},
+                {name:"Falmer Caput", g:2, t:0, s:3, def:22, skills:{"HearProtct":3, "Expert":5, "ThunderRes":1, "Protection":-2}},
+                {name:"Yamato Helm", g:1, t:0, s:3, def:45, skills:{"Artisan":4, "FastCharge":1, "Expert":3, "Sharpness":-3}},
+                {name:"Courtier Hat", g:1, t:0, s:3, def:26, skills:{"Loading":4, "FastCharge":2, "Expert":4, "Recoil":-3}},
+                {name:"Solar Headband", g:2, t:0, s:3, def:45, skills:{"Artisan":4, "FastCharge":1, "Expert":3, "Sharpness":-3}},
+                {name:"Divine Headband", g:2, t:0, s:3, def:26, skills:{"Loading":4, "FastCharge":2, "Expert":4, "Recoil":-3}},
+                {name:"Gagua Mask", g:0, t:0, s:1, def:28, skills:{"Combo Rate":10}},
+                {name:"Zuwaro Helm", g:0, t:0, s:1, def:32, skills:{"Health":5, "Water Res":6}},
+                {name:"Zuwaro Cap", g:0, t:0, s:1, def:19, skills:{"Health":5, "Water Res":8}},
+                {name:"Jaggi Mask", g:0, t:0, s:2, def:30, skills:{"HiSpdGathr":10}},
+                {name:"Bullfango Mask", g:0, t:0, s:1, def:29, skills:{"Hunger":10}},
+                {name:"Skull Face", g:0, t:0, s:3, def:30, skills:{"Torso Inc":1}},
+                {name:"Head Towel", g:0, t:0, s:3, def:28, skills:{"Fate":3, "LastingPwr":3, "Attack":-3}},
+                {name:"Acorn Helm", g:0, t:0, s:3, def:32, skills:{"BombStrUp":8, "Gunnery":3}},
+                {name:"Glass Earrings", g:0, t:0, s:1, def:29, skills:{}},
+                {name:"Yukumo Hat [Ten]", g:0, t:0, s:4, def:60, skills:{"Protection":1, "Whim":4, "Rec Level":1, "Sharpener":3}},
+                {name:"Yukumo Hat [Chi]", g:0, t:0, s:4, def:35, skills:{"Protection":2, "Whim":4, "Rec Level":2, "Precision":3}},
+                {name:"Leather Helm S", g:0, t:0, s:4, def:60, skills:{"HiSpdGathr":1, "Gathering":4, "Whim":4, "Hunger":4}},
+                {name:"Leather Cap S", g:0, t:0, s:4, def:35, skills:{"HiSpdGathr":3, "Gathering":4, "Whim":3, "Hunger":5}},
+                {name:"Chain Helm S", g:0, t:0, s:4, def:60, skills:{"Health":3, "FatigueAtk":4, "Shot Mix":4}},
+                {name:"Chain Cap S", g:0, t:0, s:4, def:35, skills:{"Health":4, "Shot Mix":5, "NormalSAdd":4}},
+                {name:"Hunter Helm S", g:0, t:0, s:4, def:62, skills:{"Huntsman":2, "Psychic":3, "SpeedSetup":4, "Poison":-2}},
+                {name:"Hunter Cap S", g:0, t:0, s:4, def:36, skills:{"Huntsman":3, "Psychic":4, "SpeedSetup":4, "Poison":-2}},
+                {name:"Bone Helm S", g:0, t:0, s:4, def:62, skills:{"Rec Level":4, "Gathering":2, "KO":2, "Sleep":-3}},
+                {name:"Bone Cap S", g:0, t:0, s:4, def:36, skills:{"Rec Level":4, "Gathering":4, "KO":4, "Sleep":-1}},
+                {name:"Alloy Helm S", g:0, t:0, s:4, def:62, skills:{"WindPress":2, "Expert":1, "Sharpener":3, "Gathering":-3}},
+                {name:"Alloy Cap S", g:0, t:0, s:4, def:36, skills:{"PelletS Up":4, "PelletSAdd":4, "Expert":2, "Gathering":-1}},
+                {name:"Bnahabra Helm S", g:0, t:0, s:4, def:64, skills:{"Status":1, "Fencing":3, "Paralysis":2, "Attack":-3}},
+                {name:"Bnahabra Cap S", g:0, t:0, s:4, def:37, skills:{"Status":3, "Reload Spd":4, "Paralysis":3, "Attack":-1}},
+                {name:"Rhenoplos Helm S", g:0, t:0, s:4, def:64, skills:{"Will Recov":2, "Gunnery":2, "Mud/Snow":2, "Stun":-3}},
+                {name:"Rhenoplos Cap S", g:0, t:0, s:4, def:37, skills:{"Will Recov":3, "Gunnery":3, "Precision":4, "Stun":-1}},
+                {name:"Jaggi Helm S", g:0, t:0, s:4, def:67, skills:{"Attack":3, "Expert":1, "Rec Speed":4, "LastingPwr":-3}},
+                {name:"Jaggi Cap S", g:0, t:0, s:4, def:39, skills:{"Attack":5, "Expert":3, "Rec Speed":4, "LastingPwr":-1}},
+                {name:"Grove Helm S", g:0, t:0, s:4, def:67, skills:{"Protection":2, "Defense":3, "Stun":3, "Paralysis":-3}},
+                {name:"Grove Cap S", g:0, t:0, s:4, def:39, skills:{"Protection":4, "Defense":4, "Stun":4, "Paralysis":-1}},
+                {name:"Froggi Helm S", g:0, t:0, s:4, def:70, skills:{"Constitutn":2, "Eating":2, "Poison":2, "Defense":-3}},
+                {name:"Froggi Cap S", g:0, t:0, s:4, def:41, skills:{"Constitutn":4, "Eating":4, "Poison":2, "Defense":-1}},
+                {name:"Urukusu Helm S", g:0, t:0, s:5, def:70, skills:{"Evasion":2, "Ice Res":3, "Attack":1, "Fire Res":-3}},
+                {name:"Urukusu Cap S", g:0, t:0, s:5, def:41, skills:{"Evasion":4, "Ice Res":2, "Attack":4, "Fire Res":-1}},
+                {name:"Qurupeco Helm S", g:0, t:0, s:4, def:67, skills:{"Wide Area":3, "Psychic":2, "Fire Atk":1, "Ice Res":-3}},
+                {name:"Qurupeco Cap S", g:0, t:0, s:4, def:39, skills:{"Wide Area":5, "Psychic":4, "Fire Atk":1, "Ice Res":-1}},
+                {name:"Ludroth Helm S", g:0, t:0, s:4, def:70, skills:{"Stamina":2, "Water Atk":2, "Stun":2, "Thundr Atk":-3}},
+                {name:"Ludroth Cap S", g:0, t:0, s:4, def:41, skills:{"Stamina":4, "Water Atk":1, "Stun":5, "Thundr Atk":-1}},
+                {name:"Barroth Helm S", g:0, t:0, s:4, def:71, skills:{"Guard":3, "Constitutn":3, "Potential":4, "Hunger":-3}},
+                {name:"Barroth Cap S", g:0, t:0, s:4, def:41, skills:{"NormalS Up":3, "Recoil":4, "Potential":6, "Hunger":-2}},
+                {name:"Ingot Helm S", g:0, t:0, s:5, def:77, skills:{"WindPress":2, "Expert":3, "Sharpener":3, "Whim":-3}},
+                {name:"Ingot Cap S", g:0, t:0, s:5, def:45, skills:{"PelletS Up":3, "PelletSAdd":4, "Reload Spd":4, "Whim":-2}},
+                {name:"Baggi Helm S", g:0, t:0, s:5, def:71, skills:{"Attack":3, "Rec Speed":3, "Rec Level":2, "Fire Res":-3}},
+                {name:"Baggi Cap S", g:0, t:0, s:5, def:41, skills:{"Attack":5, "Rec Speed":5, "Rec Level":2, "Fire Res":-1}},
+                {name:"Ranguro Helm S", g:0, t:0, s:5, def:71, skills:{"Evasion":3, "Quake Res":1, "Fire Res":4, "Water Res":-3}},
+                {name:"Ranguro Cap S", g:0, t:0, s:5, def:41, skills:{"Evasion":5, "NormalSAdd":1, "Fire Res":6, "Water Res":-1}},
+                {name:"Rathian Helm S", g:0, t:0, s:5, def:74, skills:{"Health":2, "Fire Atk":2, "Rec Speed":2, "Water Atk":-3}},
+                {name:"Rathian Cap S", g:0, t:0, s:5, def:43, skills:{"Health":4, "Fire Atk":2, "Rec Speed":3, "Water Atk":-2}},
+                {name:"Hapuru Helm S", g:0, t:0, s:5, def:74, skills:{"Eating":1, "Sheathe":1, "Thundr Atk":-3, "Gluttony":2}},
+                {name:"Hapuru Cap S", g:0, t:0, s:5, def:43, skills:{"Eating":2, "Sheathe":3, "Thundr Atk":-2, "Gluttony":2}},
+                {name:"Nebula Helm S", g:0, t:0, s:5, def:74, skills:{"Status":1, "ThunderRes":2, "Sharpness":3, "Combo Rate":-3}},
+                {name:"Nebula Cap S", g:0, t:0, s:5, def:43, skills:{"Status":2, "ThunderRes":3, "PierceSAdd":4, "Combo Rate":-2}},
+                {name:"Narga Helm S", g:0, t:0, s:5, def:77, skills:{"Evade Dist":2, "Evasion":1, "Sense":3, "Stamina":-3}},
+                {name:"Narga Cap S", g:0, t:0, s:5, def:45, skills:{"Evade Dist":4, "Evasion":3, "Sense":3, "Stamina":-1}},
+                {name:"Barioth Helm S", g:0, t:0, s:5, def:77, skills:{"Evasion":1, "Constitutn":3, "Ice Attack":2, "Will Recov":-3}},
+                {name:"Barioth Cap S", g:0, t:0, s:5, def:45, skills:{"Evasion":5, "Constitutn":4, "Ice Attack":1, "Will Recov":-1}},
+                {name:"Rathalos Helm S", g:0, t:0, s:5, def:80, skills:{"Debilitate":1, "Attack":4, "Sharpener":3, "Rec Level":-3}},
+                {name:"Rathalos Cap S", g:0, t:0, s:5, def:47, skills:{"Debilitate":2, "Rapid Fire":4, "Attack":5, "Rec Level":-2}},
+                {name:"Uragaan Helm S", g:0, t:0, s:5, def:80, skills:{"PunishDraw":3, "Crit Draw":4, "Defense":3, "Water Res":-3}},
+                {name:"Uragaan Cap S", g:0, t:0, s:5, def:47, skills:{"PierceS Up":4, "Recoil":5, "Defense":4, "Water Res":-2}},
+                {name:"Dober Helm", g:0, t:0, s:6, def:80, skills:{"Will Recov":3, "Dragon Atk":3, "Evasion":4, "Hunger":-3}},
+                {name:"Dober Cap", g:0, t:0, s:6, def:47, skills:{"Will Recov":5, "Dragon Atk":3, "Evasion":5, "Hunger":-2}},
+                {name:"Jinouga Helm S", g:0, t:0, s:6, def:81, skills:{"Awaken":2, "Thundr Atk":1, "Evade Dist":3, "Sense":-3}},
+                {name:"Jinouga Cap S", g:0, t:0, s:6, def:47, skills:{"Awaken":4, "Thundr Atk":1, "Evade Dist":4, "Sense":-2}},
+                {name:"Diablos Helm S", g:0, t:0, s:6, def:81, skills:{"Crit Draw":3, "Sheathe":1, "Quake Res":2, "Status":-3}},
+                {name:"Diablos Cap S", g:0, t:0, s:6, def:47, skills:{"PierceS Up":3, "NormalSAdd":3, "Sheathe":3, "Status":-2}},
+                {name:"Tigrex Helm S", g:0, t:0, s:6, def:81, skills:{"HearProtct":2, "Stamina":1, "Gluttony":3, "Protection":-3}},
+                {name:"Tigrex Cap S", g:0, t:0, s:6, def:47, skills:{"HearProtct":3, "Stamina":3, "Gluttony":2, "Protection":-3}},
+                {name:"Agnaktor Helm S", g:0, t:0, s:6, def:81, skills:{"Constitutn":1, "Sharpness":4, "Fire Atk":4, "Water Atk":-2}},
+                {name:"Agnaktor Cap S", g:0, t:0, s:6, def:47, skills:{"NormalS Up":4, "Fire Atk":5, "Precision":2, "Water Atk":-2}},
+                {name:"Doboru Helm S", g:0, t:0, s:6, def:81, skills:{"Slam":1, "Potential":4, "Attack":3, "Expert":-3}},
+                {name:"Doboru Cap S", g:0, t:0, s:6, def:47, skills:{"Slam":3, "Potential":3, "Recoil":5, "Expert":-2}},
+                {name:"Qurupeco Helm U", g:0, t:0, s:5, def:70, skills:{"Wide Area":2, "Eating":3, "Thundr Atk":1, "Ice Attack":-3}},
+                {name:"Qurupeco Cap U", g:0, t:0, s:5, def:41, skills:{"Wide Area":4, "Eating":5, "Thundr Atk":1, "Ice Attack":-1}},
+                {name:"Ludroth Helm U", g:0, t:0, s:4, def:71, skills:{"Stamina":1, "Water Res":4, "ThunderRes":-3, "FatigueAtk":3}},
+                {name:"Ludroth Cap U", g:0, t:0, s:4, def:41, skills:{"Stamina":3, "Status":5, "ThunderRes":-2, "FatigueAtk":3}},
+                {name:"Barroth Helm U", g:0, t:0, s:5, def:74, skills:{"KO":1, "Defense":4, "Fire Atk":-3, "FatigueAtk":1}},
+                {name:"Barroth Cap U", g:0, t:0, s:5, def:43, skills:{"PierceS Up":3, "Ice Attack":1, "Defense":5, "Fire Atk":-2}},
+                {name:"Nebula Helm U", g:0, t:0, s:5, def:77, skills:{"FastCharge":2, "Thundr Atk":5, "FatigueAtk":4, "Ice Attack":-2}},
+                {name:"Nebula Cap U", g:0, t:0, s:5, def:45, skills:{"FastCharge":5, "Thundr Atk":4, "FatigueAtk":4, "Ice Attack":-2}},
+                {name:"Narga Helm U", g:0, t:0, s:5, def:80, skills:{"Stamina":1, "Will Recov":2, "Perception":1, "Constitutn":-3}},
+                {name:"Narga Cap U", g:0, t:0, s:5, def:47, skills:{"Stamina":2, "Will Recov":2, "Perception":3, "Constitutn":-2}},
+                {name:"Barioth Helm U", g:0, t:0, s:5, def:80, skills:{"Evade Dist":2, "Constitutn":3, "Sense":3, "Evasion":-3}},
+                {name:"Barioth Cap U", g:0, t:0, s:5, def:47, skills:{"Evade Dist":5, "Constitutn":3, "Sense":4, "Evasion":-1}},
+                {name:"Uragaan Helm U", g:0, t:0, s:5, def:81, skills:{"Guard":2, "Will Recov":1, "BombStrUp":1, "Dragon Res":-3}},
+                {name:"Uragaan Cap U", g:0, t:0, s:5, def:47, skills:{"PelletS Up":2, "Will Recov":4, "BombStrUp":1, "Dragon Res":-2}},
+                {name:"Diablos Helm U", g:0, t:0, s:6, def:84, skills:{"PunishDraw":2, "KO":3, "FatigueAtk":4, "Dragon Atk":-2}},
+                {name:"Diablos Cap U", g:0, t:0, s:6, def:49, skills:{"Recoil":4, "Reload Spd":4, "NormalSAdd":1, "Dragon Atk":-4}},
+                {name:"Tigrex Helm U", g:0, t:0, s:6, def:84, skills:{"HearProtct":2, "FastCharge":3, "Psychic":5, "Protection":-3}},
+                {name:"Tigrex Cap U", g:0, t:0, s:6, def:49, skills:{"HearProtct":4, "FastCharge":4, "Psychic":4, "Protection":-3}},
+                {name:"Agnaktor Helm U", g:0, t:0, s:6, def:84, skills:{"Guard":3, "Guard Up":5, "Ice Attack":2, "Fire Atk":-1}},
+                {name:"Agnaktor Cap U", g:0, t:0, s:6, def:49, skills:{"Reload Spd":4, "Ice Attack":2, "PierceSAdd":6, "Fire Atk":-1}},
+                {name:"Golden Moon Helm", g:0, t:0, s:6, def:84, skills:{"Slam":2, "Protection":1, "Fate":1, "ThunderRes":-3}},
+                {name:"Golden Moon Cap", g:0, t:0, s:6, def:49, skills:{"Slam":3, "Protection":1, "Fate":3, "ThunderRes":-2}},
+                {name:"Silver Sol Helm", g:0, t:0, s:0, def:84, skills:{"Debilitate":2, "Sharpness":3, "Attack":5, "Health":-3}},
+                {name:"Silver Sol Cap", g:0, t:0, s:0, def:49, skills:{"Debilitate":3, "NormalS Up":4, "Attack":5, "Health":-3}},
+                {name:"Vangis Helm", g:0, t:0, s:6, def:86, skills:{"Artisan":5, "Eating":2, "Ice Res":1, "Sharpness":-3}},
+                {name:"Vangis Cap", g:0, t:0, s:6, def:50, skills:{"Loading":5, "Eating":4, "Ice Res":1, "Recoil":-3}},
+                {name:"Ranger Hat", g:0, t:0, s:6, def:77, skills:{"Carving":2, "Expert":1, "Rec Level":1, "Fate":-3}},
+                {name:"Scout Veil", g:0, t:0, s:6, def:45, skills:{"Carving":3, "Expert":3, "Rec Level":1, "Fate":-2}},
+                {name:"Guild Bard Tricorne S", g:1, t:0, s:6, def:74, skills:{"Rewards":2, "Perception":3, "Wide Area":3, "Fate":-3}},
+                {name:"Guild Bard Hat S", g:1, t:0, s:6, def:43, skills:{"Rewards":4, "Perception":3, "Wide Area":5, "Fate":-1}},
+                {name:"Scholar Hood S", g:2, t:0, s:6, def:74, skills:{"Rewards":2, "Perception":3, "Wide Area":3, "Fate":-3}},
+                {name:"Scholar Beret S", g:2, t:0, s:6, def:43, skills:{"Rewards":4, "Perception":3, "Wide Area":5, "Fate":-1}},
+                {name:"Nightmare Furore S", g:0, t:0, s:4, def:64, skills:{"FastCharge":1, "Evasion":2, "SpeedSetup":3, "Guard":-3}},
+                {name:"Nightmare Furore S", g:0, t:0, s:4, def:64, skills:{"FastCharge":1, "Evasion":2, "SpeedSetup":3, "Guard":-3}},
+                {name:"Nightmare Brume S", g:0, t:0, s:4, def:37, skills:{"FastCharge":3, "Evasion":4, "SpeedSetup":3, "Precision":-1}},
+                {name:"Nightmare Brume S", g:0, t:0, s:4, def:37, skills:{"FastCharge":3, "Evasion":4, "SpeedSetup":3, "Precision":-1}},
+                {name:"Viking Helm S", g:0, t:0, s:4, def:70, skills:{"Sharpness":3, "Sheathe":3, "Water Atk":1, "Sharpener":-2}},
+                {name:"Viking Cap S", g:0, t:0, s:4, def:41, skills:{"NormalS Up":3, "Sheathe":4, "Water Atk":2, "Reload Spd":-2}},
+                {name:"Rouage Testa S", g:1, t:0, s:5, def:74, skills:{"HearProtct":2, "Expert":4, "ThunderRes":3, "Protection":-4}},
+                {name:"Rouage Caput S", g:1, t:0, s:5, def:43, skills:{"HearProtct":4, "Expert":5, "ThunderRes":3, "Protection":-3}},
+                {name:"Falmer Testa S", g:2, t:0, s:5, def:74, skills:{"HearProtct":2, "Expert":4, "ThunderRes":3, "Protection":-4}},
+                {name:"Falmer Caput S", g:2, t:0, s:5, def:43, skills:{"HearProtct":4, "Expert":5, "ThunderRes":3, "Protection":-3}},
+                {name:"Dianthus Hat", g:2, t:0, s:4, def:70, skills:{"Wide Area":4, "Psychic":2, "Perception":2, "Poison":-3}},
+                {name:"Bellflower Hat", g:2, t:0, s:4, def:41, skills:{"Wide Area":5, "Psychic":4, "Perception":2, "Poison":-2}},
+                {name:"Damascus Helm", g:0, t:0, s:6, def:86, skills:{"Artisan":4, "Thundr Atk":1, "Sharpener":2, "Sharpness":-2}},
+                {name:"Damascus Cap", g:0, t:0, s:6, def:50, skills:{"Loading":4, "PelletS Up":3, "Thundr Atk":2, "Recoil":-2}},
+                {name:"Hi Yamato Helm", g:1, t:0, s:6, def:86, skills:{"FastCharge":1, "Fencing":2, "Expert":1, "Rec Speed":-3}},
+                {name:"Hi Courtier Hat", g:1, t:0, s:6, def:50, skills:{"FastCharge":3, "PierceS Up":4, "Expert":1, "Rec Speed":-1}},
+                {name:"Hi Solar Headband", g:2, t:0, s:6, def:86, skills:{"FastCharge":1, "Fencing":2, "Expert":1, "Rec Speed":-3}},
+                {name:"Hi Divine Headband", g:2, t:0, s:6, def:50, skills:{"FastCharge":3, "PierceS Up":4, "Expert":1, "Rec Speed":-1}},
+                {name:"Dark Akantor Mask", g:0, t:0, s:2, def:89, skills:{"Slam":2, "HearProtct":3, "Fire Atk":1, "Protection":-3}},
+                {name:"Dark Akantor Fangs", g:0, t:0, s:2, def:52, skills:{"Slam":3, "HearProtct":4, "Fire Atk":1, "Protection":-3}},
+                {name:"Ukanlos Mask", g:0, t:0, s:2, def:89, skills:{"Debilitate":1, "Fencing":4, "Ice Attack":1, "FastCharge":-3}},
+                {name:"Ukanlos Fangs", g:0, t:0, s:2, def:52, skills:{"Debilitate":4, "Rapid Fire":5, "Ice Attack":1, "FastCharge":-1}},
+                {name:"Escadora Wisdom", g:0, t:0, s:0, def:89, skills:{"Elemental":2, "Blight Res":5, "Evade Dist":3, "Potential":-3}},
+                {name:"Escadora Sagesse", g:0, t:0, s:0, def:52, skills:{"Elemental":4, "Blight Res":4, "Evade Dist":4, "Potential":-3}},
+                {name:"Storm Crown", g:0, t:0, s:6, def:89, skills:{"Awaken":1, "Artisan":2, "Water Atk":1, "Eating":-3}},
+                {name:"Sky Circlet", g:0, t:0, s:6, def:52, skills:{"Awaken":1, "Loading":3, "Water Atk":2, "Eating":-3}},
+                {name:"Gagua Mask S", g:0, t:1, s:4, def:64, skills:{"Combo Rate":15}},
+                {name:"Gagua Head S", g:0, t:2, s:4, def:39, skills:{"Combo Rate":15}},
+                {name:"Zuwaro Hood S", g:0, t:0, s:4, def:64, skills:{"Health":7, "Water Res":4}},
+                {name:"Zuwaro Head S", g:0, t:0, s:4, def:39, skills:{"Health":7, "Water Res":6}},
+                {name:"Jaggi Mask S", g:0, t:1, s:5, def:71, skills:{"HiSpdGathr":10}},
+                {name:"Jaggi Head S", g:0, t:2, s:5, def:41, skills:{"HiSpdGathr":10}},
+                {name:"Bullfango Mask S", g:0, t:1, s:4, def:70, skills:{"Hunger":15}},
+                {name:"Bullfango Head S", g:0, t:2, s:4, def:41, skills:{"Hunger":15}},
+                {name:"Skull Face S", g:0, t:1, s:6, def:71, skills:{"Torso Inc":1}},
+                {name:"Skull Head S", g:0, t:2, s:6, def:41, skills:{"Torso Inc":1}},
+                {name:"Wyvern's Eye Patch", g:0, t:0, s:6, def:51, skills:{"Psychic":15}},
+                {name:"Luxury Head Towel", g:0, t:0, s:6, def:47, skills:{"Fate":3, "LastingPwr":3, "Attack":-3}},
+                {name:"Acorn Helm S", g:0, t:0, s:6, def:74, skills:{"BombStrUp":8, "Gunnery":3}},
+                {name:"Acorn Cap S", g:0, t:0, s:6, def:43, skills:{"BombStrUp":9, "Gunnery":4}},
+                {name:"Crystal Earrings", g:0, t:0, s:4, def:37, skills:{}},
+                {name:"Oakley Shades", g:0, t:0, s:6, def:51, skills:{"Wide Area":20}},
+                {name:"Jolly Roger Hat", g:0, t:0, s:5, def:56, skills:{"Carving":3, "Fate":2, "Rewards":2, "Protection":-4}},
+                {name:"Jolly Roger Cap", g:0, t:0, s:5, def:32, skills:{"Carving":4, "Fate":3, "Rewards":3, "Protection":-3}},
+                {name:"Snake Face", g:1, t:0, s:6, def:82, skills:{"FastCharge":2, "Constitutn":3, "SpeedSetup":2, "Hunger":-2}},
+                {name:"Snake Mask", g:1, t:0, s:6, def:49, skills:{"Loading":3, "Precision":3, "SpeedSetup":4, "Hunger":-3}},
+                {name:"The Boss Face", g:2, t:0, s:6, def:82, skills:{"Sense":2, "FastCharge":2, "Psychic":3, "Elemental":-2}},
+                {name:"The Boss Mask", g:2, t:0, s:6, def:49, skills:{"Sense":3, "Loading":3, "Psychic":4, "Elemental":-1}},
+                {name:"Uniqlo Knit Hat", g:0, t:0, s:6, def:82, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Uniqlo Headphones", g:0, t:0, s:6, def:49, skills:{"HearProtct":3, "Evade Dist":3, "Cold Res":3, "Eating":-2}},
+                {name:"Sword Saint Piercing", g:0, t:0, s:6, def:30, skills:{"Fencing":10}},
+                {name:"Barrage Piercing", g:0, t:0, s:6, def:27, skills:{"Loading":15}}
+            ],
+            plate: [
+                {name:"Yukumo Shirt", g:0, t:0, s:1, def:21, skills:{"Protection":2, "Whim":2, "Expert":1}},
+                {name:"Leather Armor", g:0, t:0, s:0, def:21, skills:{"HiSpdGathr":3, "Gathering":3, "Whim":2}},
+                {name:"Chain Mail", g:0, t:0, s:0, def:22, skills:{"Health":3, "Combo Rate":3, "Shot Mix":3}},
+                {name:"Hunter's Mail", g:0, t:1, s:1, def:25, skills:{"Huntsman":3, "Psychic":2, "SpeedSetup":1, "Poison":-1}},
+                {name:"Hunter's Vest", g:0, t:2, s:1, def:16, skills:{"Huntsman":2, "Psychic":2, "SpeedSetup":1, "Poison":-2}},
+                {name:"Loc Lac Suit", g:0, t:0, s:1, def:24, skills:{"Backpackng":2, "Hunger":5}},
+                {name:"Bone Mail", g:0, t:1, s:1, def:27, skills:{"Horn":1, "Gathering":2, "KO":3, "Sleep":-1}},
+                {name:"Bone Vest", g:0, t:2, s:1, def:17, skills:{"Horn":2, "Gathering":2, "KO":1, "Sleep":-2}},
+                {name:"Alloy Mail", g:0, t:1, s:1, def:27, skills:{"WindPress":1, "Expert":2, "Sharpener":2, "Gathering":-2}},
+                {name:"Alloy Vest", g:0, t:2, s:1, def:17, skills:{"PelletS Up":2, "Reload Spd":2, "PelletSAdd":1, "Gathering":-2}},
+                {name:"Bnahabra Suit", g:0, t:1, s:1, def:29, skills:{"Status":3, "Sheathe":1, "Sense":1, "Attack":-2}},
+                {name:"Bnahabra Vest", g:0, t:2, s:1, def:18, skills:{"Status":3, "Sheathe":1, "Sense":1, "Attack":-2}},
+                {name:"Rhenoplos Mail", g:0, t:1, s:1, def:29, skills:{"Will Recov":2, "Gunnery":1, "Mud/Snow":2, "Ice Res":-2}},
+                {name:"Rhenoplos Vest", g:0, t:2, s:1, def:18, skills:{"Will Recov":2, "Gunnery":1, "Precision":2, "Ice Res":-2}},
+                {name:"Jaggi Mail", g:0, t:1, s:1, def:31, skills:{"Attack":2, "Perception":2, "Rec Speed":1, "LastingPwr":-2}},
+                {name:"Jaggi Vest", g:0, t:2, s:1, def:19, skills:{"Attack":2, "Perception":2, "Rec Speed":1, "LastingPwr":-2}},
+                {name:"Aoashira Mail", g:0, t:1, s:1, def:31, skills:{"Gluttony":2, "Defense":2, "Stun":1, "Paralysis":-2}},
+                {name:"Aoashira Vest", g:0, t:2, s:1, def:19, skills:{"Gluttony":2, "Defense":2, "Stun":1, "Paralysis":-2}},
+                {name:"Steel Mail", g:0, t:1, s:1, def:33, skills:{"Defense":4, "Sharpener":2, "Antiseptic":1}},
+                {name:"Froggi Mail", g:0, t:1, s:1, def:33, skills:{"Constitutn":1, "Perception":1, "Stun":-2, "Status":3}},
+                {name:"Froggi Vest", g:0, t:2, s:1, def:20, skills:{"Constitutn":1, "Perception":1, "Stun":-2, "Status":3}},
+                {name:"Urukusu Mail", g:0, t:1, s:2, def:33, skills:{"Evasion":3, "Ice Res":2, "Cold Res":1, "Heat Res":-1}},
+                {name:"Urukusu Vest", g:0, t:2, s:2, def:20, skills:{"Evasion":3, "Ice Res":1, "Cold Res":1, "Heat Res":-2}},
+                {name:"Qurupeco Mail", g:0, t:1, s:1, def:31, skills:{"Wide Area":4, "Psychic":2, "Rec Level":2, "Eating":-1}},
+                {name:"Qurupeco Vest", g:0, t:2, s:1, def:19, skills:{"Wide Area":2, "Psychic":4, "Rec Level":2, "Eating":-1}},
+                {name:"Ludroth Mail", g:0, t:1, s:1, def:33, skills:{"Stamina":3, "Hunger":1, "Water Atk":1, "ThunderRes":-2}},
+                {name:"Ludroth Vest", g:0, t:2, s:1, def:20, skills:{"Stamina":3, "Hunger":1, "Water Atk":1, "ThunderRes":-2}},
+                {name:"Barroth Mail", g:0, t:1, s:1, def:35, skills:{"Guard":2, "KO":1, "Defense":4, "Constitutn":-2}},
+                {name:"Barroth Vest", g:0, t:2, s:1, def:21, skills:{"NormalS Up":3, "Precision":1, "Defense":3, "Constitutn":-2}},
+                {name:"Ingot Mail", g:0, t:1, s:2, def:39, skills:{"WindPress":3, "Thundr Atk":1, "Whim":-1, "Quake Res":2}},
+                {name:"Ingot Vest", g:0, t:2, s:2, def:23, skills:{"PelletS Up":2, "Thundr Atk":1, "Whim":-2, "PierceSAdd":2}},
+                {name:"Baggi Mail", g:0, t:1, s:2, def:35, skills:{"Attack":3, "Ice Attack":1, "Rec Speed":1, "Fire Res":-2}},
+                {name:"Baggi Vest", g:0, t:2, s:2, def:21, skills:{"Attack":3, "Ice Attack":1, "Rec Speed":1, "Fire Res":-2}},
+                {name:"Ranguro Mail", g:0, t:1, s:2, def:35, skills:{"Evasion":1, "Fire Res":3, "Heat Res":3, "Cold Res":-2}},
+                {name:"Ranguro Vest", g:0, t:2, s:2, def:21, skills:{"Evasion":2, "Fire Res":2, "Heat Res":3, "Cold Res":-2}},
+                {name:"Rathian Mail", g:0, t:1, s:2, def:37, skills:{"Health":3, "Protection":1, "Fire Atk":1, "Rec Speed":-2}},
+                {name:"Rathian Vest", g:0, t:2, s:2, def:22, skills:{"Health":2, "Protection":2, "Fire Atk":1, "Rec Speed":-2}},
+                {name:"Hapuru Mail", g:0, t:1, s:2, def:37, skills:{"Eating":3, "Water Atk":1, "Gluttony":1, "Hunger":-2}},
+                {name:"Hapuru Vest", g:0, t:2, s:2, def:22, skills:{"Eating":3, "Water Atk":1, "Gluttony":1, "Hunger":-2}},
+                {name:"Nebula Mail", g:0, t:1, s:2, def:37, skills:{"Status":1, "ThunderRes":1, "Stun":1, "Health":-2}},
+                {name:"Nebula Vest", g:0, t:2, s:2, def:22, skills:{"Status":1, "ThunderRes":1, "Stun":1, "Health":-2}},
+                {name:"Narga Mail", g:0, t:1, s:2, def:39, skills:{"Evade Dist":4, "Will Recov":2, "Sense":1, "Attack":-2}},
+                {name:"Narga Vest", g:0, t:2, s:2, def:23, skills:{"Evade Dist":4, "Will Recov":1, "Sense":1, "Attack":-3}},
+                {name:"Barioth Mail", g:0, t:1, s:2, def:39, skills:{"Stamina":3, "Constitutn":1, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Barioth Vest", g:0, t:2, s:2, def:23, skills:{"Stamina":3, "Constitutn":1, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Rathalos Mail", g:0, t:1, s:3, def:41, skills:{"Debilitate":3, "Attack":1, "Fire Atk":1, "Rec Level":-2}},
+                {name:"Rathalos Vest", g:0, t:2, s:3, def:24, skills:{"Debilitate":3, "Attack":1, "Fire Atk":1, "Rec Level":-2}},
+                {name:"Uragaan Mail", g:0, t:1, s:2, def:41, skills:{"PunishDraw":3, "Defense":1, "Fire Res":1, "Water Res":-2}},
+                {name:"Uragaan Vest", g:0, t:2, s:2, def:24, skills:{"PierceS Up":3, "Defense":1, "Fire Res":1, "Water Res":-2}},
+                {name:"Jinouga Mail", g:0, t:1, s:3, def:41, skills:{"Awaken":3, "Thundr Atk":1, "Sharpness":2, "Sense":-3}},
+                {name:"Jinouga Vest", g:0, t:2, s:3, def:24, skills:{"Awaken":3, "Thundr Atk":2, "NormalS Up":1, "Sense":-3}},
+                {name:"Diablos Mail", g:0, t:1, s:3, def:43, skills:{"Crit Draw":2, "FatigueAtk":1, "Quake Res":2, "Status":-2}},
+                {name:"Diablos Vest", g:0, t:2, s:3, def:25, skills:{"PierceS Up":2, "NormalSAdd":1, "FatigueAtk":1, "Status":-3}},
+                {name:"Tigrex Mail", g:0, t:1, s:3, def:43, skills:{"HearProtct":2, "Psychic":1, "Gluttony":1, "Protection":-1}},
+                {name:"Tigrex Vest", g:0, t:2, s:3, def:25, skills:{"HearProtct":1, "Psychic":1, "Gluttony":1, "Protection":-2}},
+                {name:"Agnaktor Mail", g:0, t:1, s:3, def:43, skills:{"Guard":1, "Sharpness":2, "Expert":2, "Potential":-2}},
+                {name:"Agnaktor Vest", g:0, t:2, s:3, def:25, skills:{"NormalS Up":2, "PierceSAdd":2, "Precision":1, "Potential":-2}},
+                {name:"Doboru Mail", g:0, t:1, s:3, def:43, skills:{"Slam":2, "Potential":1, "Attack":1, "Expert":-3}},
+                {name:"Doboru Vest", g:0, t:2, s:3, def:25, skills:{"Slam":1, "Potential":1, "Recoil":3, "Expert":-2}},
+                {name:"Guild Bard Suit", g:1, t:1, s:3, def:39, skills:{"Rewards":3, "Perception":2, "Wide Area":1, "Fate":-3}},
+                {name:"Guild Bard Vest", g:1, t:2, s:3, def:23, skills:{"Rewards":3, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Scholar Suit", g:2, t:1, s:3, def:39, skills:{"Rewards":3, "Perception":2, "Wide Area":1, "Fate":-3}},
+                {name:"Scholar Vest", g:2, t:2, s:3, def:23, skills:{"Rewards":3, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Nightmare Toronko", g:0, t:1, s:1, def:35, skills:{"FastCharge":1, "LastingPwr":1, "SpeedSetup":1, "Guard":-2}},
+                {name:"Nightmare Toronko", g:0, t:1, s:1, def:35, skills:{"FastCharge":1, "LastingPwr":1, "SpeedSetup":1, "Guard":-2}},
+                {name:"Nightmare Shtam", g:0, t:2, s:1, def:21, skills:{"FastCharge":1, "LastingPwr":1, "SpeedSetup":1, "Precision":-2}},
+                {name:"Nightmare Shtam", g:0, t:2, s:1, def:21, skills:{"FastCharge":1, "LastingPwr":1, "SpeedSetup":1, "Precision":-2}},
+                {name:"Viking Mail", g:0, t:1, s:1, def:33, skills:{"Sharpness":2, "Rec Speed":1, "Water Res":1, "Sharpener":-3}},
+                {name:"Viking Vest", g:0, t:2, s:1, def:20, skills:{"NormalS Up":2, "Rec Speed":1, "Water Res":1, "Reload Spd":-3}},
+                {name:"Rouage Petto", g:1, t:1, s:3, def:37, skills:{"HearProtct":1, "Expert":2, "ThunderRes":1, "Protection":-3}},
+                {name:"Pouage Pectus", g:1, t:2, s:3, def:22, skills:{"HearProtct":2, "Expert":1, "ThunderRes":1, "Protection":-3}},
+                {name:"Falmer Petto", g:2, t:1, s:3, def:37, skills:{"HearProtct":1, "Expert":2, "ThunderRes":1, "Protection":-3}},
+                {name:"Falmer Pectus", g:2, t:2, s:3, def:22, skills:{"HearProtct":2, "Expert":1, "ThunderRes":1, "Protection":-3}},
+                {name:"Atea Mail", g:0, t:1, s:3, def:39, skills:{"Fencing":1, "Guard Up":4, "Sharpener":-2}},
+                {name:"Atea Vest", g:0, t:2, s:3, def:23, skills:{"Rapid Fire":1, "Recoil":4, "Reload Spd":-2}},
+                {name:"Yamato Plate", g:1, t:1, s:3, def:45, skills:{"Artisan":1, "FastCharge":1, "Expert":1, "Sharpness":-2}},
+                {name:"Courtier Plate", g:1, t:2, s:3, def:26, skills:{"Loading":1, "FastCharge":1, "Expert":1, "Recoil":-2}},
+                {name:"Solar Plate", g:2, t:1, s:3, def:45, skills:{"Artisan":1, "FastCharge":1, "Expert":1, "Sharpness":-2}},
+                {name:"Divine Plate", g:2, t:2, s:3, def:26, skills:{"Loading":1, "FastCharge":1, "Expert":1, "Recoil":-2}},
+                {name:"Zuwaro Mantle", g:0, t:1, s:1, def:32, skills:{"Health":5, "Water Res":4}},
+                {name:"Zuwaro Cape", g:0, t:2, s:1, def:19, skills:{"Health":5, "Water Res":4}},
+                {name:"Bath Towel", g:0, t:0, s:3, def:28, skills:{"Fate":2, "LastingPwr":2, "Attack":-3}},
+                {name:"Acorn Mail", g:0, t:0, s:2, def:32, skills:{"BombStrUp":2, "Gunnery":7}},
+                {name:"Yukumo Shirt [Ten]", g:0, t:1, s:4, def:60, skills:{"Protection":2, "Whim":2, "Rec Level":2, "Sharpener":1}},
+                {name:"Yukumo Shirt [Chi]", g:0, t:2, s:4, def:35, skills:{"Protection":1, "Whim":3, "Rec Level":2, "Precision":1}},
+                {name:"Leather Mail S", g:0, t:1, s:4, def:60, skills:{"HiSpdGathr":2, "Gathering":3, "Whim":1, "Hunger":3}},
+                {name:"Leather Vest S", g:0, t:2, s:4, def:35, skills:{"HiSpdGathr":3, "Gathering":3, "Whim":1, "Hunger":2}},
+                {name:"Chain Mail S", g:0, t:1, s:4, def:60, skills:{"Health":2, "FatigueAtk":2, "Shot Mix":5}},
+                {name:"Chain Vest S", g:0, t:2, s:4, def:35, skills:{"Health":3, "Shot Mix":1, "NormalSAdd":5}},
+                {name:"Hunter's Mail S", g:0, t:1, s:4, def:62, skills:{"Huntsman":1, "Psychic":2, "Poison":-3, "Perception":3}},
+                {name:"Hunter's Vest S", g:0, t:2, s:4, def:36, skills:{"Huntsman":1, "Psychic":2, "Poison":-3, "Perception":3}},
+                {name:"Loc Lac Suit S", g:0, t:1, s:4, def:62, skills:{"Backpackng":2, "Psychic":5}},
+                {name:"Loc Lac Vest S", g:0, t:2, s:4, def:36, skills:{"Backpackng":2, "Psychic":5}},
+                {name:"Bone Mail S", g:0, t:1, s:4, def:62, skills:{"Gathering":1, "KO":4, "Sleep":-1, "Horn":3}},
+                {name:"Bone Vest S", g:0, t:2, s:4, def:36, skills:{"Gathering":1, "KO":3, "Sleep":-2, "Horn":3}},
+                {name:"Alloy Mail S", g:0, t:1, s:4, def:62, skills:{"WindPress":2, "Expert":1, "Sharpener":2, "Gathering":-2}},
+                {name:"Alloy Vest S", g:0, t:2, s:4, def:36, skills:{"PelletS Up":2, "PelletSAdd":2, "Expert":1, "Gathering":-2}},
+                {name:"Bnahabra Suit S", g:0, t:1, s:4, def:64, skills:{"Status":2, "Fencing":1, "Attack":-2, "Dragon Res":4}},
+                {name:"Bnahabra Vest S", g:0, t:2, s:4, def:37, skills:{"Status":1, "Paralysis":2, "Attack":-2, "Dragon Res":4}},
+                {name:"Rhenoplos Mail S", g:0, t:1, s:4, def:64, skills:{"Will Recov":1, "Gunnery":2, "Stun":-2, "Defense":4}},
+                {name:"Rhenoplos Vest S", g:0, t:2, s:4, def:37, skills:{"Will Recov":2, "Precision":1, "Stun":-2, "Defense":4}},
+                {name:"Jaggi Mail S", g:0, t:1, s:4, def:67, skills:{"Attack":2, "Expert":3, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Jaggi Vest S", g:0, t:2, s:4, def:39, skills:{"Attack":2, "Expert":3, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Grove Mail S", g:0, t:1, s:4, def:67, skills:{"Protection":1, "Defense":3, "Stun":3, "Paralysis":-2}},
+                {name:"Grove Vest S", g:0, t:2, s:4, def:39, skills:{"Protection":1, "Defense":3, "Stun":3, "Paralysis":-2}},
+                {name:"Steel Mail S", g:0, t:1, s:5, def:71, skills:{"Guard":3, "Sharpener":4, "Antiseptic":2}},
+                {name:"Froggi Mail S", g:0, t:1, s:4, def:70, skills:{"Constitutn":4, "Eating":4, "Poison":1, "Defense":-2}},
+                {name:"Froggi Vest S", g:0, t:2, s:4, def:41, skills:{"Constitutn":4, "Eating":3, "Poison":2, "Defense":-2}},
+                {name:"Urukusu Mail S", g:0, t:1, s:5, def:70, skills:{"Evasion":1, "Ice Res":3, "Attack":1, "Fire Res":-2}},
+                {name:"Urukusu Vest S", g:0, t:2, s:5, def:41, skills:{"Evasion":1, "Ice Res":3, "Attack":1, "Fire Res":-2}},
+                {name:"Qurupeco Mail S", g:0, t:1, s:4, def:67, skills:{"Wide Area":5, "Psychic":1, "Fire Atk":1, "Ice Res":-2}},
+                {name:"Qurupeco Vest S", g:0, t:2, s:4, def:39, skills:{"Wide Area":5, "Psychic":1, "Fire Atk":1, "Ice Res":-2}},
+                {name:"Ludroth Mail S", g:0, t:1, s:4, def:70, skills:{"Stamina":2, "Water Atk":1, "Thundr Atk":-2, "KO":4}},
+                {name:"Ludroth Vest S", g:0, t:2, s:4, def:41, skills:{"Stamina":2, "Water Atk":1, "Thundr Atk":-2, "KO":4}},
+                {name:"Barroth Mail S", g:0, t:1, s:4, def:71, skills:{"Guard":1, "Constitutn":1, "Potential":2, "Hunger":-3}},
+                {name:"Barroth Vest S", g:0, t:2, s:4, def:41, skills:{"NormalS Up":2, "Recoil":1, "Potential":1, "Hunger":-3}},
+                {name:"Ingot Mail S", g:0, t:1, s:5, def:77, skills:{"WindPress":4, "Expert":1, "Sharpener":3, "Whim":-1}},
+                {name:"Ingot Vest S", g:0, t:2, s:5, def:45, skills:{"PelletS Up":1, "PelletSAdd":3, "Reload Spd":3, "Whim":-2}},
+                {name:"Baggi Mail S", g:0, t:1, s:5, def:71, skills:{"Attack":3, "Rec Speed":1, "Rec Level":1, "Fire Res":-2}},
+                {name:"Baggi Vest S", g:0, t:2, s:5, def:41, skills:{"Attack":1, "Rec Speed":1, "Rec Level":3, "Fire Res":-2}},
+                {name:"Ranguro Mail S", g:0, t:1, s:5, def:71, skills:{"Evasion":3, "Quake Res":3, "Fire Res":3, "Water Res":-2}},
+                {name:"Ranguro Vest S", g:0, t:2, s:5, def:41, skills:{"Evasion":3, "NormalSAdd":3, "Fire Res":3, "Water Res":-2}},
+                {name:"Rathian Mail S", g:0, t:1, s:5, def:74, skills:{"Health":1, "Rec Speed":4, "Water Atk":-2, "Protection":4}},
+                {name:"Rathian Vest S", g:0, t:2, s:5, def:43, skills:{"Health":2, "Rec Speed":3, "Water Atk":-2, "Protection":4}},
+                {name:"Hapuru Mail S", g:0, t:1, s:5, def:74, skills:{"Eating":5, "Water Atk":3, "Sheathe":1, "Thundr Atk":-2}},
+                {name:"Hapuru Vest S", g:0, t:2, s:5, def:43, skills:{"Eating":5, "Water Atk":3, "Sheathe":1, "Thundr Atk":-2}},
+                {name:"Nebula Mail S", g:0, t:1, s:5, def:74, skills:{"Status":3, "ThunderRes":2, "Sharpness":2, "Combo Rate":-2}},
+                {name:"Nebula Vest S", g:0, t:2, s:5, def:43, skills:{"Status":3, "ThunderRes":1, "PierceSAdd":3, "Combo Rate":-2}},
+                {name:"Narga Mail S", g:0, t:1, s:5, def:77, skills:{"Evade Dist":3, "Evasion":5, "Sense":1, "Stamina":-2}},
+                {name:"Narga Vest S", g:0, t:2, s:5, def:45, skills:{"Evade Dist":2, "Evasion":5, "Sense":2, "Stamina":-2}},
+                {name:"Barioth Mail S", g:0, t:1, s:5, def:77, skills:{"Evasion":3, "Constitutn":1, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Barioth Vest S", g:0, t:2, s:5, def:45, skills:{"Evasion":3, "Constitutn":1, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Rathalos Mail S", g:0, t:1, s:5, def:80, skills:{"Debilitate":3, "Attack":1, "Sharpener":1, "Rec Level":-2}},
+                {name:"Rathalos Vest S", g:0, t:2, s:5, def:47, skills:{"Debilitate":3, "Rapid Fire":1, "Attack":1, "Rec Level":-2}},
+                {name:"Uragaan Mail S", g:0, t:1, s:5, def:80, skills:{"PunishDraw":1, "Crit Draw":1, "Water Res":-2, "Fire Res":3}},
+                {name:"Uragaan Vest S", g:0, t:2, s:5, def:47, skills:{"PierceS Up":1, "Recoil":1, "Water Res":-2, "Fire Res":3}},
+                {name:"Dober Mail", g:0, t:1, s:6, def:80, skills:{"Will Recov":2, "Dragon Atk":1, "Evasion":2, "Hunger":-2}},
+                {name:"Dober Vest", g:0, t:2, s:6, def:47, skills:{"Will Recov":2, "Dragon Atk":1, "Evasion":1, "Hunger":-3}},
+                {name:"Jinouga Mail S", g:0, t:1, s:6, def:81, skills:{"Awaken":1, "Thundr Atk":1, "Evade Dist":1, "Sense":-2}},
+                {name:"Jinouga Vest S", g:0, t:2, s:6, def:47, skills:{"Awaken":1, "Thundr Atk":1, "Evade Dist":1, "Sense":-2}},
+                {name:"Diablos Mail S", g:0, t:1, s:6, def:81, skills:{"Crit Draw":2, "Sheathe":2, "Quake Res":1, "Status":-2}},
+                {name:"Diablos Vest S", g:0, t:2, s:6, def:47, skills:{"PierceS Up":2, "NormalSAdd":2, "Sheathe":1, "Status":-2}},
+                {name:"Tigrex Mail S", g:0, t:1, s:6, def:81, skills:{"HearProtct":4, "Stamina":3, "Gluttony":1, "Protection":-3}},
+                {name:"Tigrex Vest S", g:0, t:2, s:6, def:47, skills:{"HearProtct":3, "Stamina":3, "Gluttony":2, "Protection":-3}},
+                {name:"Agnaktor Mail S", g:0, t:1, s:6, def:81, skills:{"Constitutn":2, "Sharpness":1, "Water Atk":-2, "Fire Res":2}},
+                {name:"Agnaktor Vest S", g:0, t:2, s:6, def:47, skills:{"NormalS Up":1, "Precision":2, "Water Atk":-2, "Fire Res":2}},
+                {name:"Doboru Mail S", g:0, t:1, s:6, def:81, skills:{"Slam":2, "Potential":1, "Attack":4, "Expert":-2}},
+                {name:"Doboru Vest S", g:0, t:2, s:6, def:47, skills:{"Slam":2, "Potential":2, "Recoil":2, "Expert":-3}},
+                {name:"Qurupeco Mail U", g:0, t:1, s:5, def:70, skills:{"Wide Area":5, "Eating":3, "Thundr Atk":1, "Ice Attack":-2}},
+                {name:"Qurupeco Vest U", g:0, t:2, s:5, def:41, skills:{"Wide Area":5, "Eating":3, "Thundr Atk":1, "Ice Attack":-2}},
+                {name:"Ludroth Mail U", g:0, t:1, s:4, def:71, skills:{"Stamina":1, "Status":1, "Water Res":1, "ThunderRes":-2}},
+                {name:"Ludroth Vest U", g:0, t:2, s:4, def:41, skills:{"Stamina":1, "Status":1, "Water Res":1, "ThunderRes":-2}},
+                {name:"Barroth Mail U", g:0, t:1, s:5, def:74, skills:{"KO":3, "Ice Attack":3, "Fire Atk":-2, "FatigueAtk":1}},
+                {name:"Barroth Vest U", g:0, t:2, s:5, def:43, skills:{"PierceS Up":3, "Ice Attack":1, "Fire Atk":-2, "KO":3}},
+                {name:"Nebula Mail U", g:0, t:1, s:5, def:77, skills:{"FastCharge":1, "Thundr Atk":1, "FatigueAtk":1, "Ice Attack":-2}},
+                {name:"Nebula Vest U", g:0, t:2, s:5, def:45, skills:{"FastCharge":1, "Thundr Atk":1, "FatigueAtk":1, "Ice Attack":-2}},
+                {name:"Narga Mail U", g:0, t:1, s:5, def:80, skills:{"Stamina":1, "Will Recov":1, "Perception":1, "Constitutn":-2}},
+                {name:"Narga Vest U", g:0, t:2, s:5, def:47, skills:{"Stamina":1, "Will Recov":1, "Perception":1, "Constitutn":-2}},
+                {name:"Barioth Mail U", g:0, t:1, s:5, def:80, skills:{"Evade Dist":5, "Constitutn":2, "Sense":2, "Evasion":-2}},
+                {name:"Barioth Vest U", g:0, t:2, s:5, def:47, skills:{"Evade Dist":5, "Constitutn":2, "Sense":2, "Evasion":-2}},
+                {name:"Uragaan Mail U", g:0, t:1, s:5, def:81, skills:{"Guard":5, "Will Recov":2, "BombStrUp":1, "Dragon Res":-1}},
+                {name:"Uragaan Vest U", g:0, t:2, s:5, def:47, skills:{"PelletS Up":3, "Will Recov":3, "BombStrUp":2, "Dragon Res":-1}},
+                {name:"Diablos Mail U", g:0, t:1, s:6, def:84, skills:{"PunishDraw":1, "KO":1, "FatigueAtk":1, "Dragon Atk":-2}},
+                {name:"Diablos Vest U", g:0, t:2, s:6, def:49, skills:{"Recoil":1, "Reload Spd":2, "NormalSAdd":1, "Dragon Atk":-1}},
+                {name:"Tigrex Mail U", g:0, t:1, s:6, def:84, skills:{"HearProtct":3, "FastCharge":1, "Psychic":4, "Protection":-3}},
+                {name:"Tigrex Vest U", g:0, t:2, s:6, def:49, skills:{"HearProtct":3, "FastCharge":3, "Psychic":3, "Protection":-2}},
+                {name:"Agnaktor Mail U", g:0, t:1, s:6, def:84, skills:{"Guard":2, "Guard Up":1, "Ice Attack":4, "Fire Atk":-2}},
+                {name:"Agnaktor Vest U", g:0, t:2, s:6, def:49, skills:{"Reload Spd":2, "Ice Attack":4, "PierceSAdd":1, "Fire Atk":-2}},
+                {name:"Golden Moon Mail", g:0, t:1, s:6, def:84, skills:{"Slam":1, "Protection":1, "Fate":1, "ThunderRes":-2}},
+                {name:"Golden Moon Vest", g:0, t:2, s:6, def:49, skills:{"Slam":1, "Protection":1, "Fate":1, "ThunderRes":-2}},
+                {name:"Silver Sol Mail", g:0, t:1, s:6, def:84, skills:{"Debilitate":2, "Sharpness":1, "Attack":1, "Health":-3}},
+                {name:"Silver Sol Vest", g:0, t:2, s:6, def:49, skills:{"Debilitate":1, "NormalS Up":2, "Attack":1, "Health":-3}},
+                {name:"Vangis Mail", g:0, t:1, s:6, def:86, skills:{"Artisan":3, "Eating":3, "Ice Res":3, "Sharpness":-2}},
+                {name:"Vangis Vest", g:0, t:2, s:6, def:50, skills:{"Loading":3, "Eating":3, "Ice Res":3, "Recoil":-2}},
+                {name:"Ranger Tunic", g:0, t:1, s:6, def:77, skills:{"Carving":2, "Expert":4, "Rec Level":2, "Fate":-3}},
+                {name:"Scout Tunic", g:0, t:2, s:6, def:45, skills:{"Carving":2, "Expert":4, "Rec Level":2, "Fate":-3}},
+                {name:"Guild Bard Suit S", g:1, t:1, s:6, def:74, skills:{"Rewards":3, "Perception":1, "Wide Area":3, "Fate":-2}},
+                {name:"Guild Bard Vest S", g:1, t:2, s:6, def:43, skills:{"Rewards":3, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Scholar Suit S", g:2, t:1, s:6, def:74, skills:{"Rewards":3, "Perception":1, "Wide Area":3, "Fate":-2}},
+                {name:"Scholar Vest S", g:2, t:2, s:6, def:43, skills:{"Rewards":3, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Nightmare Toronko S", g:0, t:1, s:4, def:64, skills:{"FastCharge":1, "Evasion":2, "Guard":-2, "LastingPwr":4}},
+                {name:"Nightmare Toronko S", g:0, t:1, s:4, def:64, skills:{"FastCharge":1, "Evasion":2, "Guard":-2, "LastingPwr":4}},
+                {name:"Nightmare Shtam S", g:0, t:2, s:4, def:37, skills:{"FastCharge":1, "Evasion":2, "Precision":-2, "LastingPwr":4}},
+                {name:"Nightmare Shtam S", g:0, t:2, s:4, def:37, skills:{"FastCharge":1, "Evasion":2, "Precision":-2, "LastingPwr":4}},
+                {name:"Viking Mail S", g:0, t:1, s:4, def:70, skills:{"Sharpness":1, "Sheathe":1, "Water Atk":4, "Sharpener":-1}},
+                {name:"Viking Vest S", g:0, t:2, s:4, def:41, skills:{"NormalS Up":1, "Sheathe":1, "Water Atk":3, "Reload Spd":-2}},
+                {name:"Rouage Petto S", g:1, t:1, s:5, def:74, skills:{"HearProtct":1, "ThunderRes":1, "Protection":-2, "Stun":1}},
+                {name:"Pouage Pectus S", g:1, t:2, s:5, def:43, skills:{"HearProtct":1, "ThunderRes":1, "Protection":-2, "Stun":1}},
+                {name:"Falmer Petto S", g:2, t:1, s:5, def:74, skills:{"HearProtct":1, "ThunderRes":1, "Protection":-2, "Stun":1}},
+                {name:"Falmer Pectus S", g:2, t:2, s:5, def:43, skills:{"HearProtct":1, "ThunderRes":1, "Protection":-2, "Stun":1}},
+                {name:"Atea Mail S", g:0, t:1, s:5, def:77, skills:{"Fencing":1, "Guard Up":5, "Sharpener":-3}},
+                {name:"Atea Vest S", g:0, t:2, s:5, def:45, skills:{"Rapid Fire":5, "Recoil":1, "Reload Spd":-3}},
+                {name:"Dianthus Blouse", g:2, t:1, s:5, def:70, skills:{"Wide Area":5, "Psychic":3, "Perception":1, "Poison":-2}},
+                {name:"Bellflower Blouse", g:2, t:2, s:5, def:41, skills:{"Wide Area":3, "Psychic":3, "Perception":2, "Poison":-3}},
+                {name:"Damascus Mail", g:0, t:1, s:6, def:86, skills:{"Artisan":1, "Thundr Atk":1, "Sharpener":1, "Sharpness":-4}},
+                {name:"Damascus Vest", g:0, t:2, s:6, def:50, skills:{"Loading":1, "PelletS Up":1, "Thundr Atk":1, "Recoil":-4}},
+                {name:"Hi Yamato Plate", g:1, t:1, s:6, def:86, skills:{"FastCharge":2, "Fencing":1, "Expert":4, "Rec Speed":-2}},
+                {name:"Hi Courtier Plate", g:1, t:2, s:6, def:50, skills:{"FastCharge":2, "PierceS Up":1, "Expert":4, "Rec Speed":-2}},
+                {name:"Hi Solar Plate", g:2, t:1, s:6, def:86, skills:{"FastCharge":2, "Fencing":1, "Expert":4, "Rec Speed":-2}},
+                {name:"Hi Divine Plate", g:2, t:2, s:6, def:50, skills:{"FastCharge":2, "PierceS Up":1, "Expert":4, "Rec Speed":-2}},
+                {name:"Dark Akantor Aegis", g:0, t:1, s:6, def:89, skills:{"Slam":2, "HearProtct":3, "Fire Atk":1, "Protection":-3}},
+                {name:"Dark Akantor Plate", g:0, t:2, s:6, def:52, skills:{"Slam":1, "HearProtct":4, "Fire Atk":1, "Protection":-3}},
+                {name:"Ukanlos Aegis", g:0, t:1, s:6, def:89, skills:{"Debilitate":1, "Fencing":1, "Ice Attack":1, "FastCharge":-2}},
+                {name:"Ukanlos Plate", g:0, t:2, s:6, def:52, skills:{"Debilitate":1, "Rapid Fire":1, "Ice Attack":1, "FastCharge":-2}},
+                {name:"Escadora Soul", g:0, t:1, s:6, def:89, skills:{"Elemental":2, "Blight Res":1, "Evade Dist":4, "Potential":-2}},
+                {name:"Escadora Seele", g:0, t:2, s:6, def:52, skills:{"Elemental":2, "Blight Res":3, "Evade Dist":2, "Potential":-2}},
+                {name:"Storm Wrap", g:0, t:1, s:6, def:89, skills:{"Awaken":2, "Artisan":5, "Water Atk":2, "Eating":-2}},
+                {name:"Sky Cover", g:0, t:2, s:6, def:52, skills:{"Awaken":3, "Loading":5, "Water Atk":1, "Eating":-2}},
+                {name:"Zuwaro Cloak S", g:0, t:1, s:4, def:64, skills:{"Health":3, "Water Res":8}},
+                {name:"Zuwaro Cape S", g:0, t:2, s:4, def:39, skills:{"Health":3, "Water Res":8}},
+                {name:"Luxury Bath Towel", g:0, t:0, s:6, def:47, skills:{"Fate":3, "LastingPwr":2, "Attack":-4}},
+                {name:"Acorn Mail S", g:0, t:1, s:5, def:74, skills:{"BombStrUp":2, "Gunnery":7}},
+                {name:"Acorn Vest S", g:0, t:2, s:5, def:43, skills:{"BombStrUp":2, "Gunnery":7}},
+                {name:"Crystal Necklace", g:0, t:0, s:4, def:37, skills:{}},
+                {name:"Warfront Jacket", g:0, t:1, s:3, def:73, skills:{"Adversity":10}},
+                {name:"Warfront Rider", g:0, t:2, s:3, def:49, skills:{"Adversity":10}},
+                {name:"Hunter Jacket", g:0, t:1, s:6, def:82, skills:{"Adversity":10}},
+                {name:"Hunter Rider", g:0, t:2, s:6, def:49, skills:{"Adversity":10}},
+                {name:"Jolly Roger Suit", g:0, t:1, s:6, def:56, skills:{"Carving":2, "Fate":2, "Rewards":3, "Protection":-4}},
+                {name:"Jolly Roger Jacket", g:0, t:2, s:6, def:32, skills:{"Carving":2, "Fate":2, "Rewards":3, "Protection":-4}},
+                {name:"Snake Suit", g:1, t:1, s:6, def:82, skills:{"FastCharge":2, "Constitutn":3, "SpeedSetup":2, "Hunger":-4}},
+                {name:"Snake Body", g:1, t:2, s:6, def:49, skills:{"Loading":3, "Precision":3, "SpeedSetup":1, "Hunger":-2}},
+                {name:"The Boss Suit", g:2, t:1, s:6, def:82, skills:{"Sense":2, "FastCharge":2, "Psychic":2, "Elemental":-1}},
+                {name:"The Boss Body", g:2, t:2, s:6, def:49, skills:{"Sense":2, "Loading":3, "Psychic":2, "Elemental":-2}},
+                {name:"Uniqlo Blazer", g:0, t:1, s:6, def:82, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Uniqlo Jacket", g:0, t:2, s:6, def:49, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Street Jacket", g:0, t:1, s:6, def:82, skills:{"Attack":5, "Will Recov":3, "Sense":-3}},
+                {name:"Street Jumper", g:0, t:2, s:6, def:49, skills:{"Attack":5, "Will Recov":3, "Sense":-3}},
+                {name:"Street Jacket", g:0, t:1, s:6, def:82, skills:{"Attack":5, "Will Recov":3, "Sense":-3}},
+                {name:"Street Jumper", g:0, t:2, s:6, def:49, skills:{"Attack":5, "Will Recov":3, "Sense":-3}},
+                {name:"MH Jacket", g:0, t:1, s:6, def:82, skills:{"Huntsman":10}},
+                {name:"MH Jersey", g:0, t:2, s:6, def:49, skills:{"Huntsman":10}}
+            ],
+            gauntlet: [
+                {name:"Yukumo Armband", g:0, t:0, s:1, def:21, skills:{"Protection":2, "Whim":2, "Expert":1}},
+                {name:"Leather Vambraces", g:0, t:0, s:1, def:21, skills:{"HiSpdGathr":3, "Gathering":3, "Whim":1}},
+                {name:"Chain Vambraces", g:0, t:0, s:1, def:22, skills:{"Health":4, "Combo Rate":1, "Shot Mix":2}},
+                {name:"Hunter's Vambraces", g:0, t:1, s:1, def:25, skills:{"Huntsman":2, "Psychic":3, "SpeedSetup":2, "Poison":-2}},
+                {name:"Hunter's Guards", g:0, t:2, s:1, def:16, skills:{"Huntsman":2, "Psychic":3, "SpeedSetup":2, "Poison":-2}},
+                {name:"Bone Vambraces", g:0, t:1, s:2, def:27, skills:{"Horn":2, "Gathering":4, "KO":1, "Sleep":-2}},
+                {name:"Bone Guards", g:0, t:2, s:2, def:17, skills:{"Horn":4, "Gathering":1, "KO":2, "Sleep":-2}},
+                {name:"Alloy Vambraces", g:0, t:1, s:2, def:27, skills:{"WindPress":1, "Expert":4, "Sharpener":1, "Gathering":-3}},
+                {name:"Alloy Guards", g:0, t:2, s:2, def:17, skills:{"PelletS Up":2, "Reload Spd":2, "PelletSAdd":3, "Gathering":-2}},
+                {name:"Bnahabra Gloves", g:0, t:1, s:2, def:29, skills:{"Status":1, "Sheathe":4, "Sense":1, "Attack":-1}},
+                {name:"Bnahabra Cuffs", g:0, t:2, s:2, def:18, skills:{"Status":1, "Sheathe":3, "Sense":1, "Attack":-2}},
+                {name:"Rhenoplos Vambraces", g:0, t:1, s:3, def:29, skills:{"Will Recov":1, "Gunnery":3, "Ice Res":-1, "Defense":4}},
+                {name:"Rhenoplos Guards", g:0, t:2, s:3, def:18, skills:{"Will Recov":1, "Gunnery":2, "Ice Res":-2, "Defense":4}},
+                {name:"Jaggi Vambraces", g:0, t:1, s:2, def:31, skills:{"Attack":3, "Perception":2, "Rec Speed":3, "LastingPwr":-1}},
+                {name:"Jaggi Guards", g:0, t:2, s:2, def:19, skills:{"Attack":3, "Perception":2, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Aoashira Vamraces", g:0, t:1, s:2, def:31, skills:{"Gluttony":3, "Defense":3, "Stun":2, "Paralysis":-1}},
+                {name:"Aoashira Guards", g:0, t:2, s:2, def:19, skills:{"Gluttony":2, "Defense":3, "Stun":3, "Paralysis":-1}},
+                {name:"Steel Vambraces", g:0, t:1, s:0, def:33, skills:{"Defense":5, "Sharpener":4, "Antiseptic":2}},
+                {name:"Froggi Vambraces", g:0, t:1, s:2, def:33, skills:{"Constitutn":2, "Perception":3, "Poison":2, "Stun":-2}},
+                {name:"Froggi Guards", g:0, t:2, s:2, def:20, skills:{"Constitutn":3, "Perception":2, "Poison":2, "Stun":-2}},
+                {name:"Urukusu Vambraces", g:0, t:1, s:2, def:33, skills:{"Evasion":1, "Cold Res":4, "Heat Res":-2, "Sheathe":2}},
+                {name:"Urukusu Guards", g:0, t:2, s:2, def:20, skills:{"Evasion":2, "Cold Res":3, "Heat Res":-2, "Sheathe":2}},
+                {name:"Qurupeco Vambraces", g:0, t:1, s:2, def:31, skills:{"Wide Area":1, "Psychic":4, "Rec Level":2, "Eating":-2}},
+                {name:"Qurupeco Guards", g:0, t:2, s:2, def:19, skills:{"Wide Area":2, "Psychic":3, "Rec Level":2, "Eating":-2}},
+                {name:"Ludroth Vambraces", g:0, t:1, s:2, def:33, skills:{"Stamina":1, "Hunger":2, "ThunderRes":-2, "FatigueAtk":4}},
+                {name:"Ludroth Guards", g:0, t:2, s:2, def:20, skills:{"Stamina":1, "Hunger":2, "ThunderRes":-2, "FatigueAtk":4}},
+                {name:"Barroth Vambraces", g:0, t:1, s:2, def:35, skills:{"Guard":1, "KO":4, "Constitutn":-1, "Attack":3}},
+                {name:"Barroth Guards", g:0, t:2, s:2, def:21, skills:{"NormalS Up":3, "Precision":2, "Constitutn":-1, "Attack":3}},
+                {name:"Ingot Vambraces", g:0, t:1, s:2, def:39, skills:{"WindPress":1, "Thundr Atk":4, "Whim":-1, "Quake Res":3}},
+                {name:"Ingot Guards", g:0, t:2, s:2, def:23, skills:{"PelletS Up":1, "Thundr Atk":4, "Whim":-1, "PierceSAdd":3}},
+                {name:"Baggi Vambraces", g:0, t:1, s:2, def:35, skills:{"Attack":3, "Ice Attack":1, "Rec Speed":4, "Fire Res":-1}},
+                {name:"Baggi Guards", g:0, t:2, s:2, def:21, skills:{"Attack":1, "Ice Attack":4, "Rec Speed":2, "Fire Res":-2}},
+                {name:"Ranguro Vambraces", g:0, t:1, s:0, def:35, skills:{"Evasion":4, "Fire Res":2, "Cold Res":-1, "Quake Res":4}},
+                {name:"Ranguro Guards", g:0, t:2, s:0, def:21, skills:{"Evasion":2, "Fire Res":4, "Cold Res":-1, "Shot Mix":4}},
+                {name:"Rathian Vambraces", g:0, t:1, s:0, def:37, skills:{"Health":2, "Protection":3, "Fire Atk":4, "Rec Speed":-2}},
+                {name:"Rathian Guards", g:0, t:2, s:0, def:22, skills:{"Health":3, "Protection":2, "Fire Atk":4, "Rec Speed":-2}},
+                {name:"Hapuru Vambraces", g:0, t:1, s:2, def:37, skills:{"Eating":4, "Water Atk":1, "Gluttony":3, "Hunger":-1}},
+                {name:"Hapuru Guards", g:0, t:2, s:2, def:22, skills:{"Eating":4, "Water Atk":1, "Gluttony":3, "Hunger":-1}},
+                {name:"Nebula Vambraces", g:0, t:1, s:2, def:37, skills:{"Status":1, "ThunderRes":3, "Stun":3, "Health":-2}},
+                {name:"Nebula Guards", g:0, t:2, s:2, def:22, skills:{"Status":1, "ThunderRes":2, "Stun":3, "Health":-3}},
+                {name:"Narga Vambraces", g:0, t:1, s:3, def:39, skills:{"Evade Dist":2, "Will Recov":2, "Sense":2, "Attack":-1}},
+                {name:"Narga Guards", g:0, t:2, s:3, def:23, skills:{"Evade Dist":2, "Will Recov":1, "Sense":3, "Attack":-1}},
+                {name:"Barioth Vambraces", g:0, t:1, s:3, def:39, skills:{"Stamina":2, "Constitutn":4, "Ice Attack":3, "Will Recov":-2}},
+                {name:"Barioth Guards", g:0, t:2, s:3, def:23, skills:{"Stamina":1, "Constitutn":3, "Ice Attack":5, "Will Recov":-2}},
+                {name:"Rathalos Vambraces", g:0, t:1, s:2, def:41, skills:{"Debilitate":2, "Attack":2, "Fire Atk":1, "Rec Level":-2}},
+                {name:"Rathalos Guards", g:0, t:2, s:2, def:24, skills:{"Debilitate":2, "Attack":1, "Fire Atk":2, "Rec Level":-2}},
+                {name:"Uragaan Vambraces", g:0, t:1, s:2, def:41, skills:{"PunishDraw":2, "Defense":3, "Fire Res":1, "Water Res":-1}},
+                {name:"Uragaan Guards", g:0, t:2, s:2, def:24, skills:{"PierceS Up":2, "Defense":1, "Fire Res":2, "Water Res":-2}},
+                {name:"Jinouga Vambraces", g:0, t:1, s:3, def:41, skills:{"Awaken":2, "Thundr Atk":3, "Sharpness":3, "Sense":-1}},
+                {name:"Jinouga Guards", g:0, t:2, s:3, def:24, skills:{"Awaken":2, "Thundr Atk":3, "NormalS Up":3, "Sense":-1}},
+                {name:"Diablos Vambraces", g:0, t:1, s:3, def:43, skills:{"Crit Draw":2, "FatigueAtk":1, "Quake Res":1, "Status":-3}},
+                {name:"Diablos Guards", g:0, t:2, s:3, def:25, skills:{"PierceS Up":1, "NormalSAdd":1, "FatigueAtk":4, "Status":-1}},
+                {name:"Tigrex Vambraces", g:0, t:1, s:3, def:43, skills:{"HearProtct":3, "Psychic":4, "Gluttony":1, "Protection":-3}},
+                {name:"Tigrex Guards", g:0, t:2, s:3, def:25, skills:{"HearProtct":3, "Psychic":3, "Gluttony":2, "Protection":-3}},
+                {name:"Agnaktor Vambraces", g:0, t:1, s:3, def:43, skills:{"Guard":2, "Sharpness":1, "Expert":1, "Potential":-3}},
+                {name:"Agnaktor Guards", g:0, t:2, s:3, def:25, skills:{"NormalS Up":1, "PierceSAdd":1, "Precision":2, "Potential":-3}},
+                {name:"Doboru Vambraces", g:0, t:1, s:3, def:43, skills:{"Slam":3, "Potential":1, "Attack":4, "Expert":-1}},
+                {name:"Doboru Guards", g:0, t:2, s:3, def:25, skills:{"Slam":3, "Potential":3, "Recoil":1, "Expert":-2}},
+                {name:"Guild Bard Vambraces", g:1, t:1, s:3, def:39, skills:{"Rewards":4, "Perception":2, "Wide Area":3, "Fate":-2}},
+                {name:"Guild Bard Gloves", g:1, t:2, s:3, def:23, skills:{"Rewards":3, "Perception":4, "Wide Area":1, "Fate":-3}},
+                {name:"Scholar Gloves", g:2, t:1, s:3, def:39, skills:{"Rewards":4, "Perception":2, "Wide Area":3, "Fate":-2}},
+                {name:"Scholar Cuffs", g:2, t:2, s:3, def:23, skills:{"Rewards":3, "Perception":4, "Wide Area":1, "Fate":-3}},
+                {name:"Nightmare Lurama", g:0, t:1, s:3, def:35, skills:{"FastCharge":3, "LastingPwr":2, "SpeedSetup":3, "Guard":-1}},
+                {name:"Nightmare Luast", g:0, t:2, s:3, def:21, skills:{"FastCharge":2, "LastingPwr":3, "SpeedSetup":2, "Precision":-2}},
+                {name:"Viking Vambraces", g:0, t:1, s:3, def:33, skills:{"Sharpness":1, "Rec Speed":3, "Water Res":1, "Sharpener":-2}},
+                {name:"Viking Guards", g:0, t:2, s:3, def:20, skills:{"NormalS Up":2, "Rec Speed":2, "Water Res":1, "Reload Spd":-2}},
+                {name:"Rouage Mano", g:1, t:1, s:3, def:37, skills:{"HearProtct":3, "Expert":4, "ThunderRes":1, "Protection":-1}},
+                {name:"Rouage Brasso", g:1, t:2, s:3, def:22, skills:{"HearProtct":3, "Expert":3, "ThunderRes":1, "Protection":-2}},
+                {name:"Falmer Mano", g:2, t:1, s:3, def:37, skills:{"HearProtct":3, "Expert":4, "ThunderRes":1, "Protection":-1}},
+                {name:"Falmer Brasso", g:2, t:2, s:3, def:22, skills:{"HearProtct":3, "Expert":3, "ThunderRes":1, "Protection":-2}},
+                {name:"Atea Vambraces", g:0, t:1, s:3, def:39, skills:{"Fencing":5, "Guard Up":1, "Sharpener":-5}},
+                {name:"Atea Guards", g:0, t:2, s:3, def:23, skills:{"Rapid Fire":5, "Recoil":1, "Reload Spd":-5}},
+                {name:"Yamato Bracers", g:1, t:1, s:3, def:45, skills:{"Artisan":3, "FastCharge":3, "Expert":3, "Sharpness":-2}},
+                {name:"Courtier Bracers", g:1, t:2, s:3, def:26, skills:{"Loading":3, "FastCharge":4, "Expert":2, "Recoil":-2}},
+                {name:"Solar Bracers", g:2, t:1, s:3, def:45, skills:{"Artisan":3, "FastCharge":3, "Expert":3, "Sharpness":-2}},
+                {name:"Divine Bracers", g:2, t:2, s:3, def:26, skills:{"Loading":3, "FastCharge":4, "Expert":2, "Recoil":-2}},
+                {name:"Sweatbands", g:0, t:0, s:3, def:28, skills:{"Fate":3, "LastingPwr":2, "Attack":-4}},
+                {name:"Yukumo Armband [Ten]", g:0, t:1, s:2, def:60, skills:{"Protection":3, "Whim":1, "Rec Level":2, "Sharpener":3}},
+                {name:"Yukumo Armband [Chi]", g:0, t:2, s:2, def:35, skills:{"Protection":3, "Whim":2, "Rec Level":1, "Precision":3}},
+                {name:"Leather Vambraces S", g:0, t:1, s:1, def:60, skills:{"HiSpdGathr":4, "Gathering":1, "Whim":4, "Hunger":2}},
+                {name:"Leather Guards S", g:0, t:2, s:1, def:35, skills:{"HiSpdGathr":1, "Gathering":3, "Whim":4, "Hunger":3}},
+                {name:"Chain Vambraces S", g:0, t:1, s:2, def:60, skills:{"Health":4, "Combo Rate":4, "Shot Mix":1}},
+                {name:"Chain Guards S", g:0, t:2, s:2, def:35, skills:{"Health":3, "Combo Rate":4, "NormalSAdd":2}},
+                {name:"Hunter's Vambraces S", g:0, t:1, s:1, def:62, skills:{"Huntsman":2, "SpeedSetup":4, "Poison":-1, "Perception":4}},
+                {name:"Hunter's Guards S", g:0, t:2, s:1, def:36, skills:{"Huntsman":1, "SpeedSetup":4, "Poison":-2, "Perception":4}},
+                {name:"Bone Vambraces S", g:0, t:1, s:2, def:62, skills:{"Rec Level":2, "KO":1, "Sleep":-3, "Horn":3}},
+                {name:"Bone Guards S", g:0, t:2, s:2, def:36, skills:{"Rec Level":2, "KO":3, "Sleep":-1, "Horn":3}},
+                {name:"Alloy Vambraces S", g:0, t:1, s:1, def:62, skills:{"WindPress":3, "Expert":5, "Sharpener":2, "Gathering":-1}},
+                {name:"Alloy Guards S", g:0, t:2, s:1, def:36, skills:{"PelletS Up":1, "PelletSAdd":2, "Expert":5, "Gathering":-3}},
+                {name:"Bnahabra Gloves S", g:0, t:1, s:1, def:64, skills:{"Status":3, "Fencing":2, "Paralysis":2, "Attack":-4}},
+                {name:"Bnahabra Cuff S", g:0, t:2, s:1, def:37, skills:{"Status":1, "Reload Spd":5, "Paralysis":1, "Attack":-4}},
+                {name:"Rhenoplos Vambraces S", g:0, t:1, s:1, def:64, skills:{"Will Recov":3, "Gunnery":4, "Mud/Snow":2, "Stun":-2}},
+                {name:"Rhenoplos Guards S", g:0, t:2, s:1, def:37, skills:{"Will Recov":3, "Gunnery":4, "Precision":1, "Stun":-3}},
+                {name:"Jaggi Vambraces S", g:0, t:1, s:2, def:67, skills:{"Attack":4, "Expert":1, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Jaggi Guards S", g:0, t:2, s:2, def:39, skills:{"Attack":4, "Expert":1, "Rec Speed":1, "LastingPwr":-3}},
+                {name:"Grove Vambraces S", g:0, t:1, s:1, def:67, skills:{"Protection":3, "Defense":3, "Stun":3, "Paralysis":-2}},
+                {name:"Grove Guards S", g:0, t:2, s:1, def:39, skills:{"Protection":3, "Defense":2, "Stun":3, "Paralysis":-3}},
+                {name:"Steel Vambraces S", g:0, t:1, s:2, def:71, skills:{"Guard":6, "Sharpener":2, "Antiseptic":1}},
+                {name:"Froggi Vambraces S", g:0, t:1, s:1, def:70, skills:{"Constitutn":2, "Eating":4, "Defense":-1, "Status":4}},
+                {name:"Froggi Guards S", g:0, t:2, s:1, def:41, skills:{"Constitutn":2, "Eating":2, "Defense":-3, "Status":4}},
+                {name:"Urukusu Vambraces S", g:0, t:1, s:1, def:70, skills:{"Evasion":4, "Attack":2, "Fire Res":-2, "Ice Attack":3}},
+                {name:"Urukusu Guards S", g:0, t:2, s:1, def:41, skills:{"Evasion":3, "Attack":2, "Fire Res":-3, "Ice Attack":3}},
+                {name:"Qurupeco Vambraces S", g:0, t:1, s:0, def:67, skills:{"Wide Area":5, "Psychic":5, "Fire Atk":1, "Ice Res":-2}},
+                {name:"Qurupeco Guards S", g:0, t:2, s:0, def:39, skills:{"Wide Area":5, "Psychic":4, "Fire Atk":1, "Ice Res":-3}},
+                {name:"Ludroth Vambraces S", g:0, t:1, s:1, def:70, skills:{"Stamina":3, "Water Atk":1, "Stun":5, "Thundr Atk":-2}},
+                {name:"Ludroth Guards S", g:0, t:2, s:1, def:41, skills:{"Stamina":2, "Water Atk":2, "Stun":4, "Thundr Atk":-3}},
+                {name:"Barroth Vambraces S", g:0, t:1, s:2, def:71, skills:{"Guard":1, "Constitutn":3, "Hunger":-2, "Attack":3}},
+                {name:"Barroth Guards S", g:0, t:2, s:2, def:41, skills:{"NormalS Up":1, "Recoil":2, "Hunger":-3, "Attack":3}},
+                {name:"Ingot Vambraces S", g:0, t:1, s:2, def:77, skills:{"WindPress":1, "Expert":2, "Sharpener":4, "Whim":-2}},
+                {name:"Ingot Guards S", g:0, t:2, s:2, def:45, skills:{"PelletS Up":2, "PelletSAdd":2, "Reload Spd":3, "Whim":-2}},
+                {name:"Baggi Vambraces S", g:0, t:1, s:1, def:71, skills:{"Attack":2, "Rec Level":3, "Fire Res":-1, "Ice Res":5}},
+                {name:"Baggi Guards S", g:0, t:2, s:1, def:41, skills:{"Attack":1, "Rec Level":3, "Fire Res":-2, "Ice Res":5}},
+                {name:"Ranguro Vambraces S", g:0, t:1, s:2, def:71, skills:{"Evasion":4, "Quake Res":1, "Water Res":-1, "Defense":3}},
+                {name:"Ranguro Guards S", g:0, t:2, s:2, def:41, skills:{"Evasion":3, "NormalSAdd":1, "Water Res":-2, "Defense":3}},
+                {name:"Rathian Vambraces S", g:0, t:1, s:1, def:74, skills:{"Health":3, "Fire Atk":6, "Rec Speed":1, "Water Atk":-1}},
+                {name:"Rathian Guards S", g:0, t:2, s:1, def:43, skills:{"Health":3, "Fire Atk":6, "Rec Speed":1, "Water Atk":-1}},
+                {name:"Hapuru Vambraces S", g:0, t:1, s:2, def:74, skills:{"Eating":4, "Water Atk":1, "Sheathe":3, "Thundr Atk":-1}},
+                {name:"Hapuru Guards S", g:0, t:2, s:2, def:43, skills:{"Eating":5, "Water Atk":1, "Sheathe":1, "Thundr Atk":-2}},
+                {name:"Nebula Vambraces S", g:0, t:1, s:0, def:74, skills:{"Status":5, "ThunderRes":5, "Sharpness":2, "Combo Rate":-1}},
+                {name:"Nebula Guards S", g:0, t:2, s:0, def:43, skills:{"Status":5, "ThunderRes":5, "PierceSAdd":1, "Combo Rate":-2}},
+                {name:"Narga Vambraces S", g:0, t:1, s:1, def:77, skills:{"Evade Dist":3, "Evasion":3, "Sense":3, "Stamina":-2}},
+                {name:"Narga Guards S", g:0, t:2, s:1, def:45, skills:{"Evade Dist":4, "Evasion":1, "Sense":4, "Stamina":-2}},
+                {name:"Barioth Vambraces S", g:0, t:1, s:1, def:77, skills:{"Evasion":1, "Constitutn":4, "Ice Attack":5, "Will Recov":-1}},
+                {name:"Barioth Guards S", g:0, t:2, s:1, def:45, skills:{"Evasion":1, "Constitutn":4, "Ice Attack":4, "Will Recov":-2}},
+                {name:"Rathalos Vambraces S", g:0, t:1, s:1, def:80, skills:{"Debilitate":3, "Sharpener":2, "Rec Level":-2, "Fire Atk":4}},
+                {name:"Rathalos Guards S", g:0, t:2, s:1, def:47, skills:{"Debilitate":3, "Rapid Fire":1, "Rec Level":-3, "Fire Atk":4}},
+                {name:"Uragaan Vambraces S", g:0, t:1, s:0, def:80, skills:{"PunishDraw":3, "Crit Draw":3, "Defense":6, "Water Res":-1}},
+                {name:"Uragaan Guards S", g:0, t:2, s:0, def:47, skills:{"PierceS Up":2, "Recoil":3, "Defense":5, "Water Res":-3}},
+                {name:"Dober Vambraces", g:0, t:1, s:3, def:80, skills:{"Dragon Atk":4, "Evasion":1, "Hunger":-1, "Dragon Res":1}},
+                {name:"Dober Guards", g:0, t:2, s:3, def:47, skills:{"Dragon Atk":2, "Evasion":2, "Hunger":-2, "Dragon Res":1}},
+                {name:"Jinouga Vambraces S", g:0, t:1, s:0, def:81, skills:{"Awaken":5, "Thundr Atk":2, "Evade Dist":5, "Sense":-1}},
+                {name:"Jinouga Guards S", g:0, t:2, s:0, def:47, skills:{"Awaken":2, "Thundr Atk":5, "Evade Dist":4, "Sense":-2}},
+                {name:"Diablos Vambraces S", g:0, t:1, s:2, def:81, skills:{"Crit Draw":3, "Sheathe":1, "Quake Res":2, "Status":-3}},
+                {name:"Diablos Guards S", g:0, t:2, s:2, def:47, skills:{"PierceS Up":3, "NormalSAdd":2, "Sheathe":2, "Status":-2}},
+                {name:"Tigrex Vambraces S", g:0, t:1, s:2, def:81, skills:{"HearProtct":2, "Stamina":1, "Gluttony":4, "Protection":-2}},
+                {name:"Tigrex Guards S", g:0, t:2, s:2, def:47, skills:{"HearProtct":2, "Stamina":1, "Gluttony":3, "Protection":-3}},
+                {name:"Agnaktor Vambraces S", g:0, t:1, s:1, def:81, skills:{"Constitutn":2, "Sharpness":2, "Fire Atk":6, "Water Atk":-1}},
+                {name:"Agnaktor Guards S", g:0, t:2, s:1, def:47, skills:{"NormalS Up":2, "Fire Atk":5, "Precision":1, "Water Atk":-3}},
+                {name:"Doboru Vambraces S", g:0, t:1, s:2, def:81, skills:{"Slam":3, "Attack":2, "Expert":-2, "Health":2}},
+                {name:"Doboru Guards S", g:0, t:2, s:2, def:47, skills:{"Slam":3, "Recoil":2, "Expert":-1, "Health":3}},
+                {name:"Qurupeco Vambraces U", g:0, t:1, s:3, def:70, skills:{"Wide Area":4, "Eating":1, "Thundr Atk":1, "Ice Attack":-1}},
+                {name:"Qurupeco Guards U", g:0, t:2, s:3, def:41, skills:{"Wide Area":4, "Eating":1, "Thundr Atk":1, "Ice Attack":-1}},
+                {name:"Ludroth Vambraces U", g:0, t:1, s:1, def:71, skills:{"Stamina":3, "Status":5, "Water Res":2, "ThunderRes":-1}},
+                {name:"Ludroth Guards U", g:0, t:2, s:1, def:41, skills:{"Stamina":2, "Status":5, "Water Res":1, "ThunderRes":-3}},
+                {name:"Barroth Vambraces U", g:0, t:1, s:3, def:74, skills:{"KO":1, "Defense":4, "Fire Atk":-1, "FatigueAtk":1}},
+                {name:"Barroth Guards U", g:0, t:2, s:3, def:43, skills:{"PierceS Up":1, "Ice Attack":1, "Defense":4, "Fire Atk":-1}},
+                {name:"Nebula Vambraces U", g:0, t:1, s:3, def:77, skills:{"FastCharge":1, "FatigueAtk":1, "Ice Attack":-3, "Stamina":2}},
+                {name:"Nebula Guards U", g:0, t:2, s:3, def:45, skills:{"FastCharge":2, "FatigueAtk":1, "Ice Attack":-2, "Stamina":2}},
+                {name:"Narga Vambraces U", g:0, t:1, s:2, def:80, skills:{"Stamina":1, "Will Recov":5, "Constitutn":-1, "Evasion":2}},
+                {name:"Narga Guards U", g:0, t:2, s:2, def:47, skills:{"Stamina":1, "Will Recov":4, "Constitutn":-2, "Evasion":2}},
+                {name:"Barioth Vambraces U", g:0, t:1, s:1, def:80, skills:{"Evade Dist":5, "Constitutn":3, "Sense":2, "Evasion":-1}},
+                {name:"Barioth Guards U", g:0, t:2, s:1, def:47, skills:{"Evade Dist":3, "Constitutn":3, "Sense":3, "Evasion":-2}},
+                {name:"Uragaan Vambraces U", g:0, t:1, s:2, def:81, skills:{"Guard":5, "Will Recov":1, "BombStrUp":1, "Dragon Res":-2}},
+                {name:"Uragaan Guards U", g:0, t:2, s:2, def:47, skills:{"PelletS Up":1, "BombStrUp":1, "Dragon Res":-3, "Reload Spd":4}},
+                {name:"Diablos Vambraces U", g:0, t:1, s:1, def:84, skills:{"PunishDraw":3, "KO":3, "FatigueAtk":3, "Dragon Atk":-2}},
+                {name:"Diablos Guards U", g:0, t:2, s:1, def:49, skills:{"Recoil":5, "Reload Spd":4, "NormalSAdd":1, "Dragon Atk":-1}},
+                {name:"Tigrex Vambraces U", g:0, t:1, s:2, def:84, skills:{"HearProtct":1, "FastCharge":3, "Psychic":3, "Protection":-2}},
+                {name:"Tigrex Guards U", g:0, t:2, s:2, def:49, skills:{"HearProtct":1, "FastCharge":1, "Psychic":4, "Protection":-3}},
+                {name:"Agnaktor Vambraces U", g:0, t:1, s:3, def:84, skills:{"Guard":1, "Guard Up":1, "Fire Atk":-3, "Water Res":2}},
+                {name:"Agnaktor Guards U", g:0, t:2, s:3, def:49, skills:{"Reload Spd":1, "PierceSAdd":1, "Fire Atk":-3, "Water Res":2}},
+                {name:"Golden Moon Braces", g:0, t:1, s:0, def:84, skills:{"Slam":4, "Protection":2, "Fate":5, "ThunderRes":-2}},
+                {name:"Golden Moon Guards", g:0, t:2, s:0, def:49, skills:{"Slam":3, "Protection":3, "Fate":4, "ThunderRes":-3}},
+                {name:"Silver Sol Vambraces", g:0, t:1, s:3, def:84, skills:{"Debilitate":2, "Sharpness":1, "Attack":2, "Health":-2}},
+                {name:"Silver Sol Guards", g:0, t:2, s:3, def:49, skills:{"Debilitate":2, "NormalS Up":1, "Attack":2, "Health":-2}},
+                {name:"Vangis Vambraces", g:0, t:1, s:2, def:86, skills:{"Artisan":2, "Eating":5, "Ice Res":1, "Sharpness":-1}},
+                {name:"Vangis Guards", g:0, t:2, s:2, def:50, skills:{"Loading":3, "Eating":4, "Ice Res":1, "Recoil":-1}},
+                {name:"Ranger Handguards", g:0, t:1, s:0, def:77, skills:{"Carving":3, "Expert":4, "Rec Level":2, "Fate":-4}},
+                {name:"Scout Handguards", g:0, t:2, s:0, def:45, skills:{"Carving":3, "Expert":3, "Rec Level":4, "Fate":-3}},
+                {name:"Guild Bard Braces S", g:1, t:1, s:2, def:74, skills:{"Rewards":2, "Perception":1, "Wide Area":4, "Fate":-2}},
+                {name:"Guild Bard Guards S", g:1, t:2, s:2, def:43, skills:{"Rewards":2, "Perception":2, "Wide Area":3, "Fate":-2}},
+                {name:"Scholar Gloves S", g:2, t:1, s:2, def:74, skills:{"Rewards":2, "Perception":1, "Wide Area":4, "Fate":-2}},
+                {name:"Scholar Cuffs S", g:2, t:2, s:2, def:43, skills:{"Rewards":2, "Perception":2, "Wide Area":3, "Fate":-2}},
+                {name:"Nightmare Lurama S", g:0, t:1, s:2, def:64, skills:{"FastCharge":2, "Evasion":2, "SpeedSetup":3, "Guard":-2}},
+                {name:"Nightmare Lurama S", g:0, t:1, s:2, def:64, skills:{"FastCharge":2, "Evasion":2, "SpeedSetup":3, "Guard":-2}},
+                {name:"Nightmare Luast S", g:0, t:2, s:2, def:37, skills:{"FastCharge":2, "Evasion":1, "SpeedSetup":4, "Precision":-2}},
+                {name:"Nightmare Luast S", g:0, t:2, s:2, def:37, skills:{"FastCharge":2, "Evasion":1, "SpeedSetup":4, "Precision":-2}},
+                {name:"Viking Vambraces S", g:0, t:1, s:1, def:70, skills:{"Sharpness":3, "Sheathe":3, "Water Atk":4, "Sharpener":-1}},
+                {name:"Viking Guards S", g:0, t:2, s:1, def:41, skills:{"NormalS Up":4, "Sheathe":1, "Water Atk":4, "Reload Spd":-2}},
+                {name:"Rouage Mano S", g:1, t:1, s:1, def:74, skills:{"HearProtct":3, "Expert":2, "ThunderRes":3, "Protection":-3}},
+                {name:"Rouage Brasso S", g:1, t:2, s:1, def:43, skills:{"HearProtct":2, "Expert":2, "ThunderRes":4, "Protection":-3}},
+                {name:"Falmer Mano S", g:2, t:1, s:1, def:74, skills:{"HearProtct":3, "Expert":2, "ThunderRes":3, "Protection":-3}},
+                {name:"Falmer Brasso S", g:2, t:2, s:1, def:43, skills:{"HearProtct":2, "Expert":2, "ThunderRes":4, "Protection":-3}},
+                {name:"Atea Vambraces S", g:0, t:1, s:1, def:77, skills:{"Fencing":5, "Guard Up":1, "Sharpener":-5}},
+                {name:"Atea Guards S", g:0, t:2, s:1, def:45, skills:{"Rapid Fire":1, "Recoil":5, "Reload Spd":-5}},
+                {name:"Dianthus Sleeves", g:2, t:1, s:1, def:70, skills:{"Wide Area":2, "Psychic":4, "Perception":4, "Poison":-1}},
+                {name:"Bellflower Sleeves", g:2, t:2, s:1, def:41, skills:{"Wide Area":4, "Psychic":4, "Perception":1, "Poison":-2}},
+                {name:"Damascus Vambraces", g:0, t:1, s:1, def:86, skills:{"Artisan":4, "Thundr Atk":4, "Sharpener":2, "Sharpness":-1}},
+                {name:"Damascus Guards", g:0, t:2, s:1, def:50, skills:{"Loading":4, "PelletS Up":1, "Thundr Atk":5, "Recoil":-1}},
+                {name:"Hi Yamato Bracers", g:1, t:1, s:2, def:86, skills:{"FastCharge":2, "Fencing":3, "Expert":2, "Rec Speed":-2}},
+                {name:"Hi Courtier Bracers", g:1, t:2, s:2, def:50, skills:{"FastCharge":3, "PierceS Up":1, "Expert":2, "Rec Speed":-3}},
+                {name:"Hi Solar Bracers", g:2, t:1, s:2, def:86, skills:{"FastCharge":2, "Fencing":3, "Expert":2, "Rec Speed":-2}},
+                {name:"Hi Divine Bracers", g:2, t:2, s:2, def:50, skills:{"FastCharge":3, "PierceS Up":1, "Expert":2, "Rec Speed":-3}},
+                {name:"Dark Akantor Claw", g:0, t:1, s:3, def:89, skills:{"Slam":1, "HearProtct":2, "Fire Atk":2, "Protection":-2}},
+                {name:"Dark Akantor Gauntlet", g:0, t:2, s:3, def:52, skills:{"Slam":2, "HearProtct":2, "Fire Atk":1, "Protection":-2}},
+                {name:"Ukanlos Claw", g:0, t:1, s:0, def:89, skills:{"Debilitate":1, "Ice Attack":7, "FastCharge":-3, "Sharpness":2}},
+                {name:"Ukanlos Gauntlet", g:0, t:2, s:0, def:52, skills:{"Debilitate":2, "Ice Attack":6, "FastCharge":-3, "NormalS Up":2}},
+                {name:"Escadora Arms", g:0, t:1, s:2, def:89, skills:{"Elemental":3, "Blight Res":1, "Evade Dist":4, "Potential":-1}},
+                {name:"Escadora Arma", g:0, t:2, s:2, def:52, skills:{"Elemental":2, "Blight Res":1, "Evade Dist":4, "Potential":-2}},
+                {name:"Storm Sleeves", g:0, t:1, s:0, def:89, skills:{"Awaken":5, "Artisan":2, "Water Atk":5, "Eating":-1}},
+                {name:"Sky Sleeves", g:0, t:2, s:0, def:52, skills:{"Awaken":5, "Loading":2, "Water Atk":5, "Eating":-1}},
+                {name:"Luxury Sweatbands", g:0, t:0, s:2, def:47, skills:{"Fate":4, "LastingPwr":2, "Attack":-3}},
+                {name:"Crystal Bracelets", g:0, t:0, s:3, def:37, skills:{}},
+                {name:"Jolly Roger Gloves", g:0, t:1, s:0, def:56, skills:{"Carving":2, "Fate":4, "Rewards":3, "Protection":-4}},
+                {name:"Jolly Roger Cuffs", g:0, t:2, s:0, def:32, skills:{"Carving":2, "Fate":3, "Rewards":4, "Protection":-4}},
+                {name:"Snake Gloves", g:1, t:1, s:2, def:82, skills:{"FastCharge":2, "Constitutn":3, "SpeedSetup":2, "Hunger":-2}},
+                {name:"Snake Arms", g:1, t:2, s:1, def:49, skills:{"Loading":4, "Precision":3, "SpeedSetup":2, "Hunger":-2}},
+                {name:"The Boss Gloves", g:2, t:1, s:2, def:82, skills:{"Sense":2, "FastCharge":2, "Psychic":4, "Elemental":-1}},
+                {name:"The Boss Arms", g:2, t:2, s:1, def:49, skills:{"Sense":2, "Loading":3, "Psychic":3, "Elemental":-3}},
+                {name:"Uniqlo Gloves", g:0, t:1, s:2, def:82, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Uniqlo Cuffs", g:0, t:2, s:2, def:49, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}}
+            ],
+            waist: [
+                {name:"Yukumo Sash", g:0, t:0, s:1, def:21, skills:{"Protection":2, "Whim":2, "Expert":1}},
+                {name:"Leather Belt", g:0, t:0, s:0, def:21, skills:{"HiSpdGathr":2, "Gathering":4, "Whim":3}},
+                {name:"Chain Belt", g:0, t:0, s:1, def:22, skills:{"Health":1, "Combo Rate":3, "Shot Mix":3}},
+                {name:"Hunter's Tasset", g:0, t:1, s:1, def:25, skills:{"Huntsman":1, "Psychic":4, "SpeedSetup":2, "Poison":-2}},
+                {name:"Hunter's Coat", g:0, t:2, s:1, def:16, skills:{"Huntsman":2, "Psychic":2, "SpeedSetup":3, "Poison":-2}},
+                {name:"Loc Lac Coil", g:0, t:0, s:1, def:24, skills:{"Backpackng":4, "Hunger":5}},
+                {name:"Bone Tasset", g:0, t:1, s:1, def:27, skills:{"Horn":3, "Gathering":1, "KO":3, "Sleep":-2}},
+                {name:"Bone Coat", g:0, t:2, s:1, def:17, skills:{"Horn":1, "Gathering":4, "KO":3, "Sleep":-1}},
+                {name:"Alloy Coil", g:0, t:1, s:2, def:27, skills:{"WindPress":2, "Expert":3, "Sharpener":1, "Gathering":-1}},
+                {name:"Alloy Coat", g:0, t:2, s:2, def:17, skills:{"PelletS Up":1, "Reload Spd":1, "PelletSAdd":2, "Gathering":-3}},
+                {name:"Bnahabra Coil", g:0, t:1, s:1, def:29, skills:{"Status":3, "Sheathe":1, "Sense":3, "Attack":-2}},
+                {name:"Bnahabra Coat", g:0, t:2, s:1, def:18, skills:{"Status":2, "Sheathe":3, "Sense":2, "Attack":-2}},
+                {name:"Rhenoplos Coil", g:0, t:1, s:1, def:29, skills:{"Will Recov":3, "Gunnery":3, "Mud/Snow":2, "Ice Res":-1}},
+                {name:"Rhenoplos Coat", g:0, t:2, s:1, def:18, skills:{"Will Recov":2, "Gunnery":4, "Precision":1, "Ice Res":-2}},
+                {name:"Jaggi Tasset", g:0, t:1, s:1, def:31, skills:{"Attack":3, "Perception":1, "Rec Speed":4, "LastingPwr":-1}},
+                {name:"Jaggi Coat", g:0, t:2, s:1, def:19, skills:{"Attack":2, "Perception":3, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Aoashira Tasset", g:0, t:1, s:1, def:31, skills:{"Gluttony":3, "Defense":2, "Stun":3, "Paralysis":-1}},
+                {name:"Aoashira Coat", g:0, t:2, s:1, def:19, skills:{"Gluttony":2, "Defense":1, "Stun":3, "Paralysis":-3}},
+                {name:"Steel Belt", g:0, t:1, s:0, def:33, skills:{"Defense":2, "Sharpener":4, "Antiseptic":5}},
+                {name:"Froggi Tasset", g:0, t:1, s:1, def:33, skills:{"Constitutn":3, "Perception":3, "Stun":-1, "Status":2}},
+                {name:"Froggi Coat", g:0, t:2, s:1, def:20, skills:{"Constitutn":1, "Perception":3, "Stun":-3, "Status":2}},
+                {name:"Urukusu Tasset", g:0, t:1, s:1, def:33, skills:{"Evasion":3, "Ice Res":3, "Cold Res":2, "Heat Res":-1}},
+                {name:"Urukusu Coat", g:0, t:2, s:1, def:20, skills:{"Evasion":1, "Ice Res":4, "Cold Res":2, "Heat Res":-2}},
+                {name:"Qurupeco Coil", g:0, t:1, s:1, def:31, skills:{"Wide Area":3, "Rec Level":1, "Eating":-2, "Horn":3}},
+                {name:"Qurupeco Coat", g:0, t:2, s:1, def:19, skills:{"Wide Area":1, "Rec Level":2, "Eating":-3, "Horn":3}},
+                {name:"Ludroth Tasset", g:0, t:1, s:1, def:33, skills:{"Stamina":3, "Hunger":2, "Water Atk":3, "ThunderRes":-1}},
+                {name:"Ludroth Coat", g:0, t:2, s:1, def:20, skills:{"Stamina":1, "Hunger":2, "Water Atk":4, "ThunderRes":-2}},
+                {name:"Barroth Tasset", g:0, t:1, s:1, def:35, skills:{"Guard":3, "KO":1, "Defense":3, "Constitutn":-2}},
+                {name:"Barroth Coat", g:0, t:2, s:1, def:21, skills:{"NormalS Up":1, "Precision":3, "Defense":2, "Constitutn":-3}},
+                {name:"Ingot Coil", g:0, t:1, s:0, def:39, skills:{"WindPress":3, "Thundr Atk":1, "Sharpener":5, "Whim":-2}},
+                {name:"Ingot Coat", g:0, t:2, s:0, def:23, skills:{"PelletS Up":4, "Thundr Atk":1, "Reload Spd":4, "Whim":-2}},
+                {name:"Baggi Coil", g:0, t:1, s:1, def:35, skills:{"Attack":2, "Ice Attack":4, "Rec Speed":2, "Fire Res":-1}},
+                {name:"Baggi Coat", g:0, t:2, s:1, def:21, skills:{"Attack":2, "Ice Attack":1, "Rec Speed":4, "Fire Res":-2}},
+                {name:"Ranguro Tasset", g:0, t:1, s:1, def:35, skills:{"Evasion":4, "Heat Res":2, "Cold Res":-1, "Quake Res":2}},
+                {name:"Ranguro Coat", g:0, t:2, s:1, def:21, skills:{"Evasion":2, "Heat Res":2, "Cold Res":-3, "Shot Mix":2}},
+                {name:"Rathian Tasset", g:0, t:1, s:1, def:37, skills:{"Health":1, "Protection":4, "Fire Atk":2, "Rec Speed":-2}},
+                {name:"Rathian Coat", g:0, t:2, s:1, def:22, skills:{"Health":3, "Protection":2, "Fire Atk":1, "Rec Speed":-3}},
+                {name:"Hapuru Tasset", g:0, t:1, s:2, def:37, skills:{"Eating":2, "Water Atk":1, "Gluttony":3, "Hunger":-1}},
+                {name:"Hapuru Coat", g:0, t:2, s:2, def:22, skills:{"Eating":3, "Water Atk":1, "Gluttony":1, "Hunger":-2}},
+                {name:"Nebula Tasset", g:0, t:1, s:1, def:37, skills:{"Status":4, "ThunderRes":1, "Stun":3, "Health":-1}},
+                {name:"Nebula Coat", g:0, t:2, s:1, def:22, skills:{"Status":4, "ThunderRes":1, "Stun":2, "Health":-2}},
+                {name:"Narga Tasset", g:0, t:1, s:1, def:39, skills:{"Evade Dist":3, "Will Recov":1, "Sense":3, "Attack":-2}},
+                {name:"Narga Coat", g:0, t:2, s:1, def:23, skills:{"Evade Dist":2, "Will Recov":2, "Sense":3, "Attack":-2}},
+                {name:"Barioth Tasset", g:0, t:1, s:2, def:39, skills:{"Stamina":1, "Constitutn":4, "Ice Attack":1, "Will Recov":-1}},
+                {name:"Barioth Coat", g:0, t:2, s:2, def:23, skills:{"Stamina":3, "Constitutn":1, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Rathalos Tasset", g:0, t:1, s:2, def:41, skills:{"Debilitate":2, "Attack":1, "Fire Atk":2, "Rec Level":-2}},
+                {name:"Rathalos Coat", g:0, t:2, s:2, def:24, skills:{"Debilitate":2, "Attack":1, "Fire Atk":2, "Rec Level":-2}},
+                {name:"Uragaan Tasset", g:0, t:1, s:0, def:41, skills:{"PunishDraw":1, "Defense":5, "Fire Res":2, "Water Res":-3}},
+                {name:"Uragaan Coat", g:0, t:2, s:0, def:24, skills:{"PierceS Up":1, "Defense":4, "Fire Res":4, "Water Res":-2}},
+                {name:"Jinouga Tasset", g:0, t:1, s:1, def:41, skills:{"Awaken":3, "Thundr Atk":2, "Sharpness":1, "Sense":-3}},
+                {name:"Jinouga Coat", g:0, t:2, s:1, def:24, skills:{"Awaken":2, "Thundr Atk":2, "NormalS Up":3, "Sense":-2}},
+                {name:"Diablos Coil", g:0, t:1, s:1, def:43, skills:{"Crit Draw":2, "FatigueAtk":3, "Quake Res":3, "Status":-1}},
+                {name:"Diablos Coat", g:0, t:2, s:1, def:25, skills:{"PierceS Up":3, "NormalSAdd":2, "FatigueAtk":1, "Status":-3}},
+                {name:"Tigrex Tasset", g:0, t:0, s:0, def:43, skills:{"HearProtct":3, "Psychic":5, "Gluttony":1, "Protection":-2}},
+                {name:"Tigrex Coat", g:0, t:0, s:0, def:25, skills:{"HearProtct":2, "Psychic":5, "Gluttony":3, "Protection":-1}},
+                {name:"Agnaktor Tasset", g:0, t:1, s:2, def:43, skills:{"Guard":1, "Sharpness":2, "Expert":2, "Potential":-2}},
+                {name:"Agnaktor Coat", g:0, t:2, s:2, def:25, skills:{"NormalS Up":2, "PierceSAdd":2, "Precision":1, "Potential":-2}},
+                {name:"Doboru Tasset", g:0, t:1, s:2, def:43, skills:{"Slam":1, "Potential":3, "Attack":1, "Expert":-2}},
+                {name:"Doboru Coat", g:0, t:2, s:2, def:25, skills:{"Slam":1, "Potential":2, "Recoil":1, "Expert":-3}},
+                {name:"Guild Bard Coil", g:1, t:1, s:1, def:39, skills:{"Rewards":2, "Perception":2, "Wide Area":4, "Fate":-1}},
+                {name:"Guild Bard Coat", g:1, t:2, s:1, def:23, skills:{"Rewards":1, "Perception":3, "Wide Area":4, "Fate":-1}},
+                {name:"Scholar Skirt", g:2, t:1, s:1, def:39, skills:{"Rewards":2, "Perception":2, "Wide Area":4, "Fate":-1}},
+                {name:"Scholar Frills", g:2, t:2, s:1, def:23, skills:{"Rewards":1, "Perception":3, "Wide Area":4, "Fate":-1}},
+                {name:"Nightmare Oha", g:0, t:1, s:1, def:35, skills:{"FastCharge":2, "LastingPwr":2, "SpeedSetup":3, "Guard":-2}},
+                {name:"Nightmare Oha", g:0, t:1, s:1, def:35, skills:{"FastCharge":2, "LastingPwr":2, "SpeedSetup":3, "Guard":-2}},
+                {name:"Nightmare Buratto", g:0, t:2, s:1, def:21, skills:{"FastCharge":2, "LastingPwr":3, "SpeedSetup":2, "Precision":-2}},
+                {name:"Nightmare Buratto", g:0, t:2, s:1, def:21, skills:{"FastCharge":2, "LastingPwr":3, "SpeedSetup":2, "Precision":-2}},
+                {name:"Viking Tasset", g:0, t:1, s:1, def:33, skills:{"Sharpness":3, "Rec Speed":3, "Water Res":1, "Sharpener":-2}},
+                {name:"Viking Coat", g:0, t:2, s:1, def:20, skills:{"NormalS Up":3, "Rec Speed":3, "Water Res":1, "Reload Spd":-2}},
+                {name:"Rouage Anca", g:1, t:1, s:1, def:37, skills:{"HearProtct":3, "Expert":4, "ThunderRes":1, "Protection":-1}},
+                {name:"Rouage Cocusa", g:1, t:2, s:1, def:22, skills:{"HearProtct":2, "Expert":1, "ThunderRes":4, "Protection":-2}},
+                {name:"Falmer Anca", g:2, t:1, s:1, def:37, skills:{"HearProtct":3, "Expert":4, "ThunderRes":1, "Protection":-1}},
+                {name:"Falmer Cocusa", g:2, t:2, s:1, def:22, skills:{"HearProtct":2, "Expert":1, "ThunderRes":4, "Protection":-2}},
+                {name:"Yamato Waistcoat", g:1, t:1, s:0, def:45, skills:{"Artisan":4, "FastCharge":2, "Expert":2, "Sharpness":-3}},
+                {name:"Courtier Waistcoat", g:1, t:2, s:0, def:26, skills:{"Loading":3, "FastCharge":3, "Expert":4, "Recoil":-1}},
+                {name:"Solar Waistcoat", g:2, t:1, s:0, def:45, skills:{"Artisan":4, "FastCharge":2, "Expert":2, "Sharpness":-3}},
+                {name:"Divine Waistcoat", g:2, t:2, s:0, def:26, skills:{"Loading":3, "FastCharge":3, "Expert":3, "Recoil":-2}},
+                {name:"Yukumo Sash [Ten]", g:0, t:1, s:2, def:60, skills:{"Protection":2, "Whim":2, "Rec Level":3, "Sharpener":2}},
+                {name:"Yukumo Sash [Chi]", g:0, t:2, s:2, def:35, skills:{"Protection":3, "Whim":1, "Rec Level":3, "Precision":2}},
+                {name:"Leather Tasset S", g:0, t:1, s:1, def:60, skills:{"HiSpdGathr":1, "Gathering":3, "Whim":4, "Hunger":3}},
+                {name:"Leather Coat S", g:0, t:2, s:1, def:35, skills:{"HiSpdGathr":3, "Gathering":1, "Whim":4, "Hunger":3}},
+                {name:"Chain Tasset S", g:0, t:1, s:2, def:60, skills:{"Health":2, "Combo Rate":4, "FatigueAtk":3}},
+                {name:"Chain Coat S", g:0, t:2, s:2, def:35, skills:{"Health":2, "Combo Rate":4, "Shot Mix":3}},
+                {name:"Hunter's Tasset S", g:0, t:1, s:1, def:62, skills:{"Huntsman":3, "Psychic":3, "Poison":-2, "Perception":3}},
+                {name:"Hunter's Coat S", g:0, t:2, s:1, def:36, skills:{"Huntsman":4, "Psychic":3, "Poison":-1, "Perception":3}},
+                {name:"Loc Lac Coil S", g:0, t:1, s:2, def:62, skills:{"Backpackng":4, "Psychic":5}},
+                {name:"Loc Lac Coat S", g:0, t:2, s:2, def:36, skills:{"Backpackng":4, "Psychic":5}},
+                {name:"Bone Tasset S", g:0, t:1, s:1, def:62, skills:{"Rec Level":3, "Gathering":4, "KO":3, "Sleep":-1}},
+                {name:"Bone Coat S", g:0, t:2, s:1, def:36, skills:{"Rec Level":3, "Gathering":4, "KO":1, "Sleep":-3}},
+                {name:"Alloy Coil S", g:0, t:1, s:2, def:62, skills:{"WindPress":2, "Expert":4, "Sharpener":1, "Gathering":-2}},
+                {name:"Alloy Coat S", g:0, t:2, s:2, def:36, skills:{"PelletS Up":1, "PelletSAdd":3, "Expert":3, "Gathering":-2}},
+                {name:"Bnahabra Coil S", g:0, t:1, s:1, def:64, skills:{"Status":2, "Fencing":2, "Paralysis":5, "Attack":-2}},
+                {name:"Bnahabra Coat S", g:0, t:2, s:1, def:37, skills:{"Status":4, "Reload Spd":1, "Paralysis":2, "Attack":-4}},
+                {name:"Rhenoplos Coil S", g:0, t:1, s:1, def:64, skills:{"Will Recov":1, "Gunnery":4, "Stun":-2, "Defense":4}},
+                {name:"Rhenoplos Coat S", g:0, t:2, s:1, def:37, skills:{"Will Recov":1, "Precision":4, "Stun":-2, "Defense":4}},
+                {name:"Jaggi Tasset S", g:0, t:1, s:1, def:67, skills:{"Attack":2, "Expert":3, "Rec Speed":4, "LastingPwr":-2}},
+                {name:"Jaggi Coat S", g:0, t:2, s:1, def:39, skills:{"Attack":1, "Expert":3, "Rec Speed":4, "LastingPwr":-3}},
+                {name:"Grove Tasset S", g:0, t:1, s:1, def:67, skills:{"Protection":4, "Defense":3, "Stun":3, "Paralysis":-1}},
+                {name:"Grove Coat S", g:0, t:2, s:1, def:39, skills:{"Protection":3, "Defense":3, "Stun":3, "Paralysis":-2}},
+                {name:"Steel Belt S", g:0, t:1, s:2, def:71, skills:{"Guard":2, "Sharpener":4, "Antiseptic":3}},
+                {name:"Froggi Tasset S", g:0, t:1, s:2, def:70, skills:{"Constitutn":2, "Eating":2, "Defense":-2, "Status":3}},
+                {name:"Froggi Coat S", g:0, t:2, s:2, def:41, skills:{"Constitutn":2, "Eating":2, "Defense":-2, "Status":3}},
+                {name:"Urukusu Tasset S", g:0, t:1, s:0, def:70, skills:{"Evasion":4, "Attack":3, "Fire Res":-2, "Ice Attack":4}},
+                {name:"Urukusu Coat S", g:0, t:2, s:0, def:41, skills:{"Evasion":4, "Attack":2, "Fire Res":-3, "Ice Attack":4}},
+                {name:"Qurupeco Coil S", g:0, t:1, s:2, def:67, skills:{"Wide Area":3, "Psychic":3, "Fire Atk":1, "Ice Res":-2}},
+                {name:"Qurupeco Coat S", g:0, t:2, s:2, def:39, skills:{"Wide Area":4, "Psychic":2, "Fire Atk":1, "Ice Res":-2}},
+                {name:"Ludroth Tasset S", g:0, t:1, s:2, def:70, skills:{"Stamina":2, "Water Atk":2, "Stun":4, "Thundr Atk":-1}},
+                {name:"Ludroth Coat S", g:0, t:2, s:2, def:41, skills:{"Stamina":2, "Water Atk":2, "Stun":3, "Thundr Atk":-2}},
+                {name:"Barroth Tasset S", g:0, t:1, s:2, def:71, skills:{"Guard":2, "Constitutn":1, "Hunger":-3, "Attack":3}},
+                {name:"Barroth Coat S", g:0, t:2, s:2, def:41, skills:{"NormalS Up":2, "Recoil":1, "Hunger":-3, "Attack":3}},
+                {name:"Ingot Coil S", g:0, t:1, s:1, def:77, skills:{"WindPress":2, "Expert":3, "Whim":-2, "Quake Res":4}},
+                {name:"Ingot Coat S", g:0, t:2, s:1, def:45, skills:{"PelletS Up":2, "PelletSAdd":3, "Whim":-2, "PierceSAdd":4}},
+                {name:"Baggi Coil S", g:0, t:1, s:0, def:71, skills:{"Rec Speed":4, "Rec Level":3, "Fire Res":-2, "Ice Res":4}},
+                {name:"Baggi Coat S", g:0, t:2, s:1, def:41, skills:{"Rec Speed":2, "Rec Level":2, "Fire Res":-3, "Ice Res":4}},
+                {name:"Ranguro Tasset S", g:0, t:1, s:2, def:71, skills:{"Evasion":2, "Fire Res":1, "Water Res":-2, "Defense":4}},
+                {name:"Rangura Coat S", g:0, t:2, s:2, def:41, skills:{"Evasion":1, "Fire Res":1, "Water Res":-3, "Defense":4}},
+                {name:"Rathian Tasset S", g:0, t:1, s:1, def:74, skills:{"Health":4, "Rec Speed":2, "Water Atk":-2, "Protection":3}},
+                {name:"Rathian Coat S", g:0, t:2, s:1, def:43, skills:{"Health":2, "Rec Speed":3, "Water Atk":-3, "Protection":3}},
+                {name:"Hapuru Tasset S", g:0, t:1, s:2, def:74, skills:{"Eating":2, "Sheathe":1, "Thundr Atk":-3, "Gluttony":3}},
+                {name:"Hapuru Coat S", g:0, t:2, s:2, def:43, skills:{"Eating":1, "Sheathe":2, "Thundr Atk":-3, "Gluttony":3}},
+                {name:"Nebula Tasset S", g:0, t:1, s:1, def:74, skills:{"Status":3, "Sharpness":2, "Combo Rate":-2, "Hunger":4}},
+                {name:"Nebula Coat S", g:0, t:2, s:1, def:43, skills:{"Status":2, "PierceSAdd":3, "Combo Rate":-2, "Hunger":4}},
+                {name:"Narga Tasset S", g:0, t:1, s:2, def:77, skills:{"Evade Dist":3, "Sense":1, "Stamina":-2, "SpeedSetup":3}},
+                {name:"Narga Coat S", g:0, t:2, s:2, def:45, skills:{"Evade Dist":1, "Sense":2, "Stamina":-3, "SpeedSetup":3}},
+                {name:"Barioth Tasset S", g:0, t:1, s:0, def:77, skills:{"Evasion":5, "Ice Attack":3, "Will Recov":-2, "Stamina":3}},
+                {name:"Barioth Coat S", g:0, t:2, s:0, def:45, skills:{"Evasion":2, "Ice Attack":5, "Will Recov":-3, "Stamina":3}},
+                {name:"Rathalos Tasset S", g:0, t:1, s:2, def:80, skills:{"Debilitate":1, "Sharpness":3, "Rec Level":-2, "Fire Atk":3}},
+                {name:"Rathalos Coat S", g:0, t:2, s:2, def:47, skills:{"Debilitate":1, "Rapid Fire":2, "Rec Level":-3, "Fire Atk":3}},
+                {name:"Uragaan Tasset S", g:0, t:1, s:3, def:80, skills:{"PunishDraw":1, "Crit Draw":1, "Water Res":-3, "Fire Res":2}},
+                {name:"Uragaan Coat S", g:0, t:2, s:3, def:47, skills:{"PierceS Up":2, "Recoil":1, "Water Res":-2, "Fire Res":2}},
+                {name:"Dober Coil", g:0, t:1, s:0, def:80, skills:{"Will Recov":5, "Dragon Atk":3, "Evasion":2, "Hunger":-3}},
+                {name:"Dober Coat", g:0, t:2, s:0, def:47, skills:{"Will Recov":4, "Dragon Atk":5, "Evasion":2, "Hunger":-2}},
+                {name:"Jinouga Tasset S", g:0, t:1, s:1, def:81, skills:{"Awaken":2, "Thundr Atk":6, "Evade Dist":1, "Sense":-2}},
+                {name:"Jinouga Coat S", g:0, t:2, s:1, def:47, skills:{"Awaken":4, "Thundr Atk":3, "Evade Dist":2, "Sense":-2}},
+                {name:"Diablos Coil S", g:0, t:1, s:2, def:81, skills:{"Crit Draw":2, "Sheathe":4, "Quake Res":2, "Status":-1}},
+                {name:"Diablos Coat S", g:0, t:2, s:2, def:47, skills:{"PierceS Up":1, "NormalSAdd":3, "Sheathe":2, "Status":-3}},
+                {name:"Tigrex  Tasset S", g:0, t:1, s:2, def:81, skills:{"HearProtct":2, "Stamina":3, "Gluttony":2, "Protection":-2}},
+                {name:"Tigrex Coat S", g:0, t:2, s:2, def:47, skills:{"HearProtct":2, "Stamina":1, "Gluttony":5, "Protection":-1}},
+                {name:"Agnaktor Tasset S", g:0, t:1, s:1, def:81, skills:{"Constitutn":3, "Sharpness":2, "Water Atk":-2, "Fire Res":4}},
+                {name:"Agnaktor Coat S", g:0, t:2, s:1, def:47, skills:{"NormalS Up":2, "Precision":4, "Water Atk":-1, "Fire Res":4}},
+                {name:"Doboru Tasset S", g:0, t:1, s:1, def:81, skills:{"Slam":2, "Potential":5, "Expert":-1, "Health":3}},
+                {name:"Doburu Coat S", g:0, t:2, s:1, def:47, skills:{"Slam":2, "Potential":5, "Expert":-1, "Health":3}},
+                {name:"Qurupeco Coil U", g:0, t:1, s:1, def:70, skills:{"Wide Area":1, "Eating":3, "Thundr Atk":5, "Ice Attack":-2}},
+                {name:"Qurupeco Coat U", g:0, t:2, s:1, def:41, skills:{"Wide Area":1, "Eating":2, "Thundr Atk":5, "Ice Attack":-3}},
+                {name:"Ludroth Tasset U", g:0, t:1, s:3, def:71, skills:{"Stamina":2, "Status":1, "Water Res":1, "ThunderRes":-3}},
+                {name:"Ludroth Coat U", g:0, t:2, s:3, def:41, skills:{"Stamina":2, "Status":2, "Water Res":1, "ThunderRes":-2}},
+                {name:"Barroth Tasset U", g:0, t:1, s:0, def:74, skills:{"KO":4, "Ice Attack":2, "Fire Atk":-2, "FatigueAtk":5}},
+                {name:"Barroth Coat U", g:0, t:2, s:0, def:43, skills:{"PierceS Up":3, "Ice Attack":5, "Fire Atk":-3, "KO":2}},
+                {name:"Nebula Tasset U", g:0, t:1, s:2, def:77, skills:{"FastCharge":1, "FatigueAtk":2, "Ice Attack":-2, "Stamina":4}},
+                {name:"Nebula Coat U", g:0, t:2, s:2, def:45, skills:{"FastCharge":1, "FatigueAtk":2, "Ice Attack":-2, "Stamina":4}},
+                {name:"Narga Tasset U", g:0, t:1, s:0, def:80, skills:{"Stamina":2, "Perception":6, "Constitutn":-2, "Evasion":3}},
+                {name:"Narga Coat U", g:0, t:2, s:1, def:47, skills:{"Stamina":2, "Perception":4, "Constitutn":-2, "Evasion":3}},
+                {name:"Barioth Tasset U", g:0, t:1, s:3, def:80, skills:{"Evade Dist":1, "Constitutn":3, "Sense":1, "Evasion":-2}},
+                {name:"Barioth Coat U", g:0, t:2, s:3, def:47, skills:{"Evade Dist":1, "Constitutn":3, "Sense":1, "Evasion":-2}},
+                {name:"Uragaan Tasset U", g:0, t:1, s:0, def:81, skills:{"Guard":1, "Will Recov":4, "BombStrUp":5, "Dragon Res":-3}},
+                {name:"Uragaan Coat U", g:0, t:2, s:0, def:47, skills:{"PelletS Up":4, "Will Recov":3, "BombStrUp":4, "Dragon Res":-2}},
+                {name:"Diablos Coil U", g:0, t:1, s:3, def:84, skills:{"PunishDraw":1, "KO":2, "FatigueAtk":2, "Dragon Atk":-2}},
+                {name:"Diablos Coat U", g:0, t:2, s:3, def:49, skills:{"Recoil":1, "Reload Spd":1, "NormalSAdd":3, "Dragon Atk":-2}},
+                {name:"Tigrex Tasset U", g:0, t:1, s:3, def:84, skills:{"HearProtct":2, "FastCharge":2, "Psychic":1, "Protection":-2}},
+                {name:"Tigrex Coat U", g:0, t:2, s:3, def:49, skills:{"HearProtct":1, "FastCharge":2, "Psychic":2, "Protection":-2}},
+                {name:"Agnaktor Tasset U", g:0, t:1, s:3, def:84, skills:{"Guard":1, "Guard Up":1, "Fire Atk":-3, "Water Res":2}},
+                {name:"Agnaktor Coat U", g:0, t:2, s:3, def:49, skills:{"Reload Spd":1, "PierceSAdd":1, "Fire Atk":-3, "Water Res":2}},
+                {name:"Golden Moon Tasset", g:0, t:1, s:3, def:84, skills:{"Slam":1, "Protection":1, "Fate":3, "ThunderRes":-2}},
+                {name:"Golden Moon Coat", g:0, t:2, s:3, def:49, skills:{"Slam":1, "Protection":1, "Fate":3, "ThunderRes":-2}},
+                {name:"Silver Sol Tasset", g:0, t:1, s:2, def:84, skills:{"Debilitate":3, "Sharpness":3, "Attack":2, "Health":-1}},
+                {name:"Silver Sol Coat", g:0, t:2, s:2, def:49, skills:{"Debilitate":3, "NormalS Up":3, "Attack":2, "Health":-1}},
+                {name:"Vangis Tasset", g:0, t:1, s:0, def:86, skills:{"Torso Inc":1}},
+                {name:"Vangis Coat", g:0, t:2, s:0, def:50, skills:{"Torso Inc":1}},
+                {name:"Ranger Belt", g:0, t:1, s:2, def:77, skills:{"Carving":4, "Expert":2, "Rec Level":1, "Fate":-2}},
+                {name:"Scout Belt", g:0, t:2, s:2, def:45, skills:{"Carving":3, "Expert":1, "Rec Level":2, "Fate":-3}},
+                {name:"Guild Bard Coil S", g:1, t:1, s:3, def:74, skills:{"Rewards":1, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Guild Bard Coat S", g:1, t:2, s:3, def:43, skills:{"Rewards":1, "Perception":1, "Wide Area":2, "Fate":-3}},
+                {name:"Scholar Skirt S", g:2, t:1, s:3, def:74, skills:{"Rewards":1, "Perception":2, "Wide Area":2, "Fate":-2}},
+                {name:"Scholar Frills S", g:2, t:2, s:3, def:43, skills:{"Rewards":1, "Perception":1, "Wide Area":2, "Fate":-3}},
+                {name:"Nightmare Oha S", g:0, t:1, s:0, def:64, skills:{"FastCharge":4, "SpeedSetup":2, "Guard":-1, "LastingPwr":6}},
+                {name:"Nightmare Oha S", g:0, t:1, s:0, def:64, skills:{"FastCharge":4, "SpeedSetup":2, "Guard":-1, "LastingPwr":6}},
+                {name:"Nightmare Buratto S", g:0, t:2, s:0, def:37, skills:{"FastCharge":4, "SpeedSetup":1, "Precision":-2, "LastingPwr":6}},
+                {name:"Nightmare Buratto S", g:0, t:2, s:0, def:37, skills:{"FastCharge":4, "SpeedSetup":1, "Precision":-2, "LastingPwr":6}},
+                {name:"Viking Tasset S", g:0, t:1, s:1, def:70, skills:{"Sharpness":2, "Sheathe":1, "Sharpener":-3, "Rec Speed":5}},
+                {name:"Viking Coat S", g:0, t:2, s:1, def:41, skills:{"NormalS Up":2, "Sheathe":3, "Reload Spd":-1, "Rec Speed":5}},
+                {name:"Rouage Anca S", g:1, t:1, s:1, def:74, skills:{"HearProtct":3, "ThunderRes":3, "Protection":-1, "Stun":4}},
+                {name:"Rouage Cocusa S", g:1, t:2, s:1, def:43, skills:{"HearProtct":2, "ThunderRes":4, "Protection":-1, "Stun":4}},
+                {name:"Falmer Anca S", g:2, t:1, s:1, def:74, skills:{"HearProtct":3, "ThunderRes":3, "Protection":-1, "Stun":4}},
+                {name:"Falmer Cocusa S", g:2, t:2, s:1, def:43, skills:{"HearProtct":2, "ThunderRes":4, "Protection":-1, "Stun":4}},
+                {name:"Dianthus Skirt", g:2, t:1, s:1, def:70, skills:{"Wide Area":4, "Psychic":4, "Perception":1, "Poison":-2}},
+                {name:"Bellflower Skirt", g:2, t:2, s:1, def:41, skills:{"Wide Area":5, "Psychic":2, "Perception":3, "Poison":-1}},
+                {name:"Damascus Coil", g:0, t:1, s:3, def:86, skills:{"Artisan":2, "Thundr Atk":1, "Sharpener":2, "Sharpness":-2}},
+                {name:"Damascus Coat", g:0, t:2, s:3, def:50, skills:{"Loading":2, "PelletS Up":2, "Thundr Atk":1, "Recoil":-2}},
+                {name:"Hi Yamato Waistcoat", g:1, t:1, s:0, def:86, skills:{"FastCharge":3, "Fencing":3, "Expert":6, "Rec Speed":-1}},
+                {name:"Hi Courtier Waistcoat", g:1, t:2, s:0, def:50, skills:{"FastCharge":1, "PierceS Up":4, "Expert":6, "Rec Speed":-2}},
+                {name:"Hi Solar Waistcoat", g:2, t:1, s:0, def:86, skills:{"FastCharge":3, "Fencing":3, "Expert":6, "Rec Speed":-1}},
+                {name:"Hi Divine Waistcoat", g:2, t:2, s:0, def:50, skills:{"FastCharge":1, "PierceS Up":4, "Expert":6, "Rec Speed":-2}},
+                {name:"DarkAkantor Cincture", g:0, t:1, s:0, def:89, skills:{"Slam":4, "HearProtct":5, "Fire Atk":2, "Protection":-2}},
+                {name:"Dark Akantor Sash", g:0, t:2, s:0, def:52, skills:{"Slam":4, "HearProtct":4, "Fire Atk":3, "Protection":-2}},
+                {name:"Ukanlos Cincture", g:0, t:1, s:1, def:89, skills:{"Debilitate":4, "Fencing":2, "FastCharge":-1, "Sharpness":4}},
+                {name:"Ukanlos Sash", g:0, t:2, s:1, def:52, skills:{"Debilitate":2, "Rapid Fire":3, "FastCharge":-2, "NormalS Up":4}},
+                {name:"Escadora Might", g:0, t:1, s:3, def:89, skills:{"Elemental":1, "Blight Res":2, "Evade Dist":2, "Potential":-2}},
+                {name:"Escadora Force", g:0, t:2, s:3, def:52, skills:{"Elemental":1, "Blight Res":2, "Evade Dist":3, "Potential":-1}},
+                {name:"Storm Waist", g:0, t:1, s:3, def:89, skills:{"Awaken":2, "Artisan":1, "Water Atk":2, "Eating":-2}},
+                {name:"Sky Sash", g:0, t:2, s:3, def:52, skills:{"Awaken":2, "Loading":1, "Water Atk":3, "Eating":-2}},
+                {name:"Crystal Sash", g:0, t:0, s:3, def:37, skills:{}},
+                {name:"Jolly Roger Coil", g:0, t:1, s:0, def:56, skills:{"Carving":4, "Fate":3, "Rewards":3, "Protection":-3}},
+                {name:"Jolly Roger Skirt", g:0, t:2, s:0, def:32, skills:{"Carving":3, "Fate":3, "Rewards":4, "Protection":-3}},
+                {name:"Snake Belt", g:1, t:1, s:2, def:82, skills:{"FastCharge":2, "Constitutn":3, "SpeedSetup":2, "Hunger":-2}},
+                {name:"Snake Band", g:1, t:2, s:1, def:49, skills:{"Loading":3, "Precision":4, "SpeedSetup":2, "Hunger":-2}},
+                {name:"The Boss Belt", g:2, t:1, s:2, def:82, skills:{"Sense":2, "FastCharge":2, "Psychic":3, "Elemental":-2}},
+                {name:"The Boss Band", g:2, t:2, s:1, def:49, skills:{"Sense":2, "Loading":3, "Psychic":4, "Elemental":-2}},
+                {name:"Uniqlo Belt", g:0, t:1, s:2, def:82, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Uniqlo Pouch", g:0, t:2, s:2, def:49, skills:{"HearProtct":1, "Evade Dist":4, "Cold Res":2, "Eating":-2}},
+                {name:"Street Belt", g:0, t:1, s:0, def:82, skills:{"Attack":5, "Will Recov":4, "Sense":-4}},
+                {name:"Street Buckle", g:0, t:2, s:0, def:49, skills:{"Attack":5, "Will Recov":4, "Sense":-4}},
+                {name:"Street Belt", g:0, t:1, s:0, def:82, skills:{"Attack":5, "Will Recov":4, "Sense":-4}},
+                {name:"Street Buckle", g:0, t:2, s:0, def:49, skills:{"Attack":5, "Will Recov":4, "Sense":-4}}
+            ],
+            boots: [
+                {name:"Yukumo Skirt", g:0, t:0, s:0, def:21, skills:{"Protection":2, "Whim":2, "Expert":2}},
+                {name:"Leather Pants", g:0, t:0, s:1, def:21, skills:{"HiSpdGathr":2, "Gathering":1, "Whim":4}},
+                {name:"Chain Pants", g:0, t:0, s:1, def:22, skills:{"Health":2, "Combo Rate":2, "Shot Mix":3}},
+                {name:"Hunter's Greaves", g:0, t:0, s:1, def:25, skills:{"Huntsman":2, "Psychic":3, "SpeedSetup":2, "Poison":-2}},
+                {name:"Hunter's Leggings", g:0, t:0, s:1, def:16, skills:{"Huntsman":1, "Psychic":3, "SpeedSetup":3, "Poison":-2}},
+                {name:"Loc Lac Boots", g:0, t:0, s:1, def:24, skills:{"Backpackng":6, "Hunger":3}},
+                {name:"Bone Greaves", g:0, t:0, s:1, def:27, skills:{"Horn":4, "Gathering":3, "KO":1, "Sleep":-1}},
+                {name:"Bone Leggings", g:0, t:0, s:1, def:17, skills:{"Horn":1, "Gathering":4, "KO":1, "Sleep":-3}},
+                {name:"Alloy Greaves", g:0, t:0, s:1, def:27, skills:{"WindPress":4, "Expert":2, "Sharpener":1, "Gathering":-2}},
+                {name:"Alloy Leggings", g:0, t:0, s:1, def:17, skills:{"PelletS Up":3, "Reload Spd":1, "PelletSAdd":3, "Gathering":-2}},
+                {name:"Bnahabra Boots", g:0, t:0, s:1, def:29, skills:{"Status":3, "Sheathe":3, "Sense":1, "Attack":-2}},
+                {name:"Bnahabra Shoes", g:0, t:0, s:1, def:18, skills:{"Status":2, "Sheathe":1, "Sense":3, "Attack":-3}},
+                {name:"Rhenoplos Greaves", g:0, t:0, s:1, def:29, skills:{"Will Recov":2, "Gunnery":4, "Mud/Snow":1, "Ice Res":-2}},
+                {name:"Rhenoplos Leggings", g:0, t:0, s:1, def:18, skills:{"Will Recov":1, "Gunnery":2, "Precision":4, "Ice Res":-2}},
+                {name:"Jaggi Greaves", g:0, t:0, s:1, def:31, skills:{"Attack":2, "Perception":3, "Rec Speed":2, "LastingPwr":-2}},
+                {name:"Jaggi Leggings", g:0, t:0, s:1, def:19, skills:{"Attack":2, "Perception":2, "Rec Speed":3, "LastingPwr":-2}},
+                {name:"Aoashira Greaves", g:0, t:0, s:0, def:31, skills:{"Torso Inc":1}},
+                {name:"Aoashira Leggings", g:0, t:0, s:0, def:19, skills:{"Torso Inc":1}},
+                {name:"Froggi Greaves", g:0, t:0, s:1, def:33, skills:{"Constitutn":2, "Perception":1, "Poison":4, "Stun":-2}},
+                {name:"Froggi Leggings", g:0, t:0, s:1, def:20, skills:{"Constitutn":2, "Perception":1, "Poison":4, "Stun":-2}},
+                {name:"Urukusu Greaves", g:0, t:0, s:1, def:33, skills:{"Evasion":2, "Cold Res":1, "Heat Res":-2, "Sheathe":4}},
+                {name:"Urukusu Leggings", g:0, t:0, s:1, def:20, skills:{"Evasion":1, "Cold Res":2, "Heat Res":-2, "Sheathe":4}},
+                {name:"Qurupeco Greaves", g:0, t:0, s:1, def:31, skills:{"Wide Area":1, "Rec Level":2, "Eating":-1, "Horn":5}},
+                {name:"Qurupeco Leggings", g:0, t:0, s:1, def:19, skills:{"Wide Area":1, "Rec Level":1, "Eating":-2, "Horn":5}},
+                {name:"Ludroth Greaves", g:0, t:0, s:1, def:33, skills:{"Stamina":1, "Hunger":3, "Water Atk":4, "ThunderRes":-1}},
+                {name:"Ludroth Leggings", g:0, t:0, s:1, def:20, skills:{"Stamina":2, "Hunger":4, "Water Atk":1, "ThunderRes":-2}},
+                {name:"Barroth Greaves", g:0, t:0, s:2, def:35, skills:{"Guard":1, "KO":2, "Constitutn":-2, "Attack":2}},
+                {name:"Barroth Leggings", g:0, t:0, s:2, def:21, skills:{"NormalS Up":1, "Precision":2, "Constitutn":-2, "Attack":2}},
+                {name:"Ingot Greaves", g:0, t:0, s:2, def:39, skills:{"WindPress":1, "Thundr Atk":1, "Sharpener":3, "Whim":-2}},
+                {name:"Ingot Leggings", g:0, t:0, s:2, def:23, skills:{"PelletS Up":1, "Thundr Atk":1, "Reload Spd":3, "Whim":-2}},
+                {name:"Baggi Greaves", g:0, t:0, s:1, def:35, skills:{"Attack":3, "Ice Attack":1, "Rec Speed":4, "Fire Res":-1}},
+                {name:"Baggi Leggings", g:0, t:0, s:1, def:21, skills:{"Attack":3, "Ice Attack":1, "Rec Speed":3, "Fire Res":-2}},
+                {name:"Ranguro Greaves", g:0, t:0, s:0, def:35, skills:{"Torso Inc":1}},
+                {name:"Ranguro Leggings", g:0, t:0, s:0, def:21, skills:{"Torso Inc":1}},
+                {name:"Rathian Greaves", g:0, t:0, s:2, def:37, skills:{"Health":3, "Protection":2, "Fire Atk":1, "Rec Speed":-1}},
+                {name:"Rathian Leggings", g:0, t:0, s:2, def:22, skills:{"Health":1, "Protection":3, "Fire Atk":1, "Rec Speed":-2}},
+                {name:"Hapuru Greaves", g:0, t:0, s:0, def:37, skills:{"Eating":4, "Water Atk":2, "Gluttony":2, "Hunger":-3}},
+                {name:"Hapuru Leggings", g:0, t:0, s:0, def:22, skills:{"Eating":2, "Water Atk":3, "Gluttony":3, "Hunger":-3}},
+                {name:"Nebula Greaves", g:0, t:0, s:1, def:37, skills:{"Status":3, "ThunderRes":2, "Stun":3, "Health":-1}},
+                {name:"Nebula Leggings", g:0, t:0, s:1, def:22, skills:{"Status":2, "ThunderRes":3, "Stun":2, "Health":-2}},
+                {name:"Narga Greaves", g:0, t:0, s:1, def:39, skills:{"Evade Dist":4, "Will Recov":1, "Sense":2, "Attack":-2}},
+                {name:"Narga Leggings", g:0, t:0, s:1, def:23, skills:{"Evade Dist":4, "Will Recov":1, "Sense":2, "Attack":-2}},
+                {name:"Barioth Greaves", g:0, t:0, s:2, def:39, skills:{"Stamina":2, "Constitutn":2, "Ice Attack":1, "Will Recov":-2}},
+                {name:"Barioth Leggings", g:0, t:0, s:2, def:23, skills:{"Stamina":1, "Constitutn":2, "Ice Attack":1, "Will Recov":-3}},
+                {name:"Rathalos Greaves", g:0, t:0, s:1, def:41, skills:{"Debilitate":2, "Attack":1, "Fire Atk":5, "Rec Level":-1}},
+                {name:"Rathalos Leggings", g:0, t:0, s:1, def:24, skills:{"Debilitate":1, "Attack":4, "Fire Atk":1, "Rec Level":-3}},
+                {name:"Uragaan Greaves", g:0, t:0, s:2, def:41, skills:{"PunishDraw":1, "Defense":3, "Fire Res":1, "Water Res":-2}},
+                {name:"Uragaan Leggings", g:0, t:0, s:2, def:24, skills:{"PierceS Up":1, "Defense":2, "Fire Res":1, "Water Res":-3}},
+                {name:"Jinouga Greaves", g:0, t:0, s:2, def:41, skills:{"Awaken":1, "Thundr Atk":4, "Sharpness":1, "Sense":-1}},
+                {name:"Jinouga Leggings", g:0, t:0, s:2, def:24, skills:{"Awaken":1, "Thundr Atk":2, "NormalS Up":1, "Sense":-3}},
+                {name:"Diablos Greaves", g:0, t:0, s:1, def:43, skills:{"Crit Draw":1, "FatigueAtk":3, "Quake Res":4, "Status":-1}},
+                {name:"Diablos Leggings", g:0, t:0, s:1, def:25, skills:{"PierceS Up":2, "NormalSAdd":3, "FatigueAtk":3, "Status":-1}},
+                {name:"Tigrex Greaves", g:0, t:0, s:2, def:43, skills:{"HearProtct":2, "Psychic":3, "Gluttony":1, "Protection":-1}},
+                {name:"Tigrex Leggings", g:0, t:0, s:2, def:25, skills:{"HearProtct":2, "Psychic":2, "Gluttony":1, "Protection":-2}},
+                {name:"Agnaktor Greaves", g:0, t:0, s:0, def:43, skills:{"Guard":4, "Sharpness":2, "Expert":4, "Potential":-1}},
+                {name:"Agnaktor Leggings", g:0, t:0, s:0, def:25, skills:{"NormalS Up":4, "PierceSAdd":2, "Precision":4, "Potential":-1}},
+                {name:"Doboru Greaves", g:0, t:0, s:1, def:43, skills:{"Slam":3, "Potential":3, "Attack":2, "Expert":-1}},
+                {name:"Doboru Leggings", g:0, t:0, s:1, def:25, skills:{"Slam":2, "Potential":2, "Recoil":4, "Expert":-1}},
+                {name:"Guild Bard Boots", g:1, t:1, s:2, def:39, skills:{"Rewards":3, "Perception":2, "Wide Area":1, "Fate":-1}},
+                {name:"Guild Bard Shoes", g:1, t:2, s:2, def:23, skills:{"Rewards":2, "Perception":1, "Wide Area":2, "Fate":-2}},
+                {name:"Scholar Socks", g:2, t:1, s:2, def:39, skills:{"Rewards":3, "Perception":2, "Wide Area":1, "Fate":-1}},
+                {name:"Scholar Sandals", g:2, t:2, s:2, def:23, skills:{"Rewards":2, "Perception":1, "Wide Area":2, "Fate":-2}},
+                {name:"Nightmare Rais", g:0, t:1, s:1, def:35, skills:{"FastCharge":3, "LastingPwr":3, "SpeedSetup":2, "Guard":-1}},
+                {name:"Nightmare Voulzer", g:0, t:2, s:1, def:21, skills:{"FastCharge":2, "LastingPwr":2, "SpeedSetup":3, "Precision":-2}},
+                {name:"Viking Greaves", g:0, t:1, s:1, def:33, skills:{"Sharpness":2, "Rec Speed":4, "Water Res":2, "Sharpener":-1}},
+                {name:"Viking Leggings", g:0, t:2, s:1, def:20, skills:{"NormalS Up":3, "Rec Speed":3, "Water Res":2, "Reload Spd":-1}},
+                {name:"Rouage Gamba", g:1, t:1, s:2, def:37, skills:{"HearProtct":1, "Expert":1, "ThunderRes":3, "Protection":-2}},
+                {name:"Rouage Femur", g:1, t:2, s:2, def:22, skills:{"HearProtct":1, "Expert":2, "ThunderRes":2, "Protection":-2}},
+                {name:"Falmer Gamba", g:2, t:1, s:2, def:37, skills:{"HearProtct":1, "Expert":1, "ThunderRes":3, "Protection":-2}},
+                {name:"Falmer Femur", g:2, t:2, s:2, def:22, skills:{"HearProtct":1, "Expert":2, "ThunderRes":2, "Protection":-2}},
+                {name:"Atea Greaves", g:0, t:1, s:0, def:39, skills:{"Fencing":4, "Guard Up":5, "Sharpener":-2}},
+                {name:"Atea Leggings", g:0, t:2, s:0, def:23, skills:{"Rapid Fire":4, "Recoil":5, "Reload Spd":-2}},
+                {name:"Yamato Greaves", g:1, t:1, s:1, def:45, skills:{"Artisan":3, "FastCharge":3, "Expert":2, "Sharpness":-1}},
+                {name:"Courtier Greaves", g:1, t:2, s:1, def:26, skills:{"Loading":4, "FastCharge":1, "Expert":1, "Recoil":-3}},
+                {name:"Solar Pants", g:2, t:1, s:1, def:45, skills:{"Artisan":3, "FastCharge":3, "Expert":1, "Sharpness":-2}},
+                {name:"Divine Pants", g:2, t:2, s:1, def:26, skills:{"Loading":4, "FastCharge":1, "Expert":1, "Recoil":-3}},
+                {name:"Bath Sandals", g:0, t:0, s:1, def:28, skills:{"Fate":3, "LastingPwr":3, "Attack":-3}},
+                {name:"Yukumo Skirt [Ten]", g:0, t:1, s:2, def:60, skills:{"Protection":2, "Whim":4, "Rec Level":2, "Sharpener":1}},
+                {name:"Yukumo Skirt [Chi]", g:0, t:2, s:2, def:35, skills:{"Protection":2, "Whim":4, "Rec Level":2, "Precision":1}},
+                {name:"Leather Greaves S", g:0, t:1, s:1, def:60, skills:{"HiSpdGathr":2, "Gathering":4, "Whim":2, "Hunger":3}},
+                {name:"Leather Leggings S", g:0, t:2, s:1, def:35, skills:{"HiSpdGathr":1, "Gathering":4, "Whim":4, "Hunger":2}},
+                {name:"Chain Greaves S", g:0, t:1, s:2, def:60, skills:{"Health":4, "Combo Rate":4, "FatigueAtk":1}},
+                {name:"Chain Leggings S", g:0, t:2, s:2, def:35, skills:{"Health":4, "Combo Rate":4, "Shot Mix":1}},
+                {name:"Hunter's Greaves S", g:0, t:1, s:1, def:62, skills:{"Huntsman":2, "Psychic":5, "SpeedSetup":2, "Poison":-2}},
+                {name:"Hunter's Leggings S", g:0, t:2, s:1, def:36, skills:{"Huntsman":2, "Psychic":4, "SpeedSetup":3, "Poison":-2}},
+                {name:"Loc Lac Boots S", g:0, t:1, s:2, def:62, skills:{"Backpackng":4, "Psychic":5}},
+                {name:"Loc Lac Shoes S", g:0, t:2, s:2, def:36, skills:{"Backpackng":4, "Psychic":5}},
+                {name:"Bone Greaves S", g:0, t:1, s:1, def:62, skills:{"Rec Level":1, "Gathering":4, "Sleep":-2, "Horn":4}},
+                {name:"Bone Leggings S", g:0, t:2, s:1, def:36, skills:{"Rec Level":2, "Gathering":2, "Sleep":-3, "Horn":4}},
+                {name:"Alloy Greaves S", g:0, t:1, s:1, def:62, skills:{"WindPress":2, "Expert":5, "Sharpener":2, "Gathering":-2}},
+                {name:"Alloy Leggings S", g:0, t:2, s:1, def:36, skills:{"PelletS Up":2, "PelletSAdd":2, "Expert":5, "Gathering":-2}},
+                {name:"Bnahabra Boots S", g:0, t:1, s:1, def:64, skills:{"Status":2, "Fencing":2, "Attack":-2, "Dragon Res":5}},
+                {name:"Bnahabra Shoes S", g:0, t:2, s:1, def:37, skills:{"Status":1, "Reload Spd":3, "Attack":-2, "Dragon Res":5}},
+                {name:"Rhenoplos Greaves S", g:0, t:1, s:2, def:64, skills:{"Will Recov":3, "Gunnery":1, "Mud/Snow":4, "Stun":-1}},
+                {name:"Rhenoplos Leggings S", g:0, t:2, s:2, def:37, skills:{"Will Recov":1, "Gunnery":3, "Precision":3, "Stun":-2}},
+                {name:"Jaggi Greaves S", g:0, t:1, s:1, def:67, skills:{"Attack":4, "Expert":3, "Rec Speed":3, "LastingPwr":-1}},
+                {name:"Jaggi Leggings S", g:0, t:2, s:1, def:39, skills:{"Attack":3, "Expert":2, "Rec Speed":4, "LastingPwr":-2}},
+                {name:"Grove Greaves S", g:0, t:1, s:0, def:67, skills:{"Torso Inc":1}},
+                {name:"Grove Leggings S", g:0, t:2, s:0, def:39, skills:{"Torso Inc":1}},
+                {name:"Froggi Greaves S", g:0, t:1, s:1, def:70, skills:{"Constitutn":2, "Eating":2, "Poison":5, "Defense":-2}},
+                {name:"Froggi Leggings S", g:0, t:2, s:1, def:41, skills:{"Constitutn":1, "Eating":3, "Poison":5, "Defense":-2}},
+                {name:"Urukusu Greaves S", g:0, t:1, s:1, def:70, skills:{"Evasion":3, "Ice Res":4, "Attack":3, "Fire Res":-1}},
+                {name:"Urukuru Leggings S", g:0, t:2, s:1, def:41, skills:{"Evasion":2, "Ice Res":5, "Attack":2, "Fire Res":-2}},
+                {name:"Qurupeco Greaves S", g:0, t:1, s:1, def:67, skills:{"Wide Area":4, "Psychic":2, "Fire Atk":4, "Ice Res":-1}},
+                {name:"Qurupeco Leggings S", g:0, t:2, s:1, def:39, skills:{"Wide Area":3, "Psychic":2, "Fire Atk":4, "Ice Res":-2}},
+                {name:"Ludroth Greaves S", g:0, t:1, s:1, def:70, skills:{"Stamina":1, "Water Atk":4, "Thundr Atk":-2, "KO":4}},
+                {name:"Ludroth Leggings S", g:0, t:2, s:1, def:41, skills:{"Stamina":1, "Water Atk":4, "Thundr Atk":-2, "KO":4}},
+                {name:"Barroth Greaves S", g:0, t:1, s:0, def:71, skills:{"Guard":3, "Constitutn":4, "Potential":5, "Hunger":-1}},
+                {name:"Barroth Leggings S", g:0, t:2, s:0, def:41, skills:{"NormalS Up":2, "Recoil":4, "Potential":5, "Hunger":-2}},
+                {name:"Ingot Greaves S", g:0, t:1, s:2, def:77, skills:{"WindPress":2, "Expert":3, "Whim":-2, "Quake Res":2}},
+                {name:"Ingot Leggings S", g:0, t:2, s:2, def:45, skills:{"PelletS Up":2, "PelletSAdd":3, "Whim":-2, "PierceSAdd":2}},
+                {name:"Baggi Greaves S", g:0, t:1, s:2, def:71, skills:{"Attack":4, "Rec Speed":2, "Rec Level":1, "Fire Res":-2}},
+                {name:"Baggi Leggings S", g:0, t:2, s:2, def:41, skills:{"Attack":3, "Rec Speed":2, "Rec Level":1, "Fire Res":-3}},
+                {name:"Ranguro Greaves S", g:0, t:1, s:0, def:71, skills:{"Torso Inc":1}},
+                {name:"Rangura Leggings S", g:0, t:2, s:0, def:41, skills:{"Torso Inc":1}},
+                {name:"Rathian Greaves S", g:0, t:1, s:2, def:74, skills:{"Health":5, "Fire Atk":1, "Rec Speed":1, "Water Atk":-2}},
+                {name:"Rathian Leggings S", g:0, t:2, s:2, def:43, skills:{"Health":5, "Fire Atk":1, "Rec Speed":1, "Water Atk":-2}},
+                {name:"Hapuru Greaves S", g:0, t:1, s:0, def:74, skills:{"Eating":3, "Water Atk":5, "Sheathe":4, "Thundr Atk":-1}},
+                {name:"Hapuru Leggings S", g:0, t:2, s:0, def:43, skills:{"Eating":3, "Water Atk":5, "Sheathe":4, "Thundr Atk":-1}},
+                {name:"Nebula Greaves S", g:0, t:1, s:2, def:74, skills:{"Status":3, "Sharpness":1, "Combo Rate":-2, "Hunger":3}},
+                {name:"Nebula Leggings S", g:0, t:2, s:2, def:43, skills:{"Status":3, "PierceSAdd":1, "Combo Rate":-2, "Hunger":3}},
+                {name:"Narga Greaves S", g:0, t:1, s:2, def:77, skills:{"Evade Dist":4, "Sense":2, "Stamina":-1, "SpeedSetup":2}},
+                {name:"Narga Leggings S", g:0, t:2, s:2, def:45, skills:{"Evade Dist":4, "Sense":1, "Stamina":-2, "SpeedSetup":2}},
+                {name:"Barioth Greaves S", g:0, t:1, s:1, def:77, skills:{"Evasion":2, "Constitutn":4, "Will Recov":-2, "Stamina":3}},
+                {name:"Barioth Leggings S", g:0, t:2, s:1, def:45, skills:{"Evasion":2, "Constitutn":4, "Will Recov":-2, "Stamina":3}},
+                {name:"Rathalos Greaves S", g:0, t:1, s:1, def:80, skills:{"Debilitate":2, "Attack":5, "Sharpener":1, "Rec Level":-3}},
+                {name:"Rathalos Leggings S", g:0, t:2, s:1, def:47, skills:{"Debilitate":2, "Rapid Fire":2, "Attack":5, "Rec Level":-2}},
+                {name:"Uragaan Greaves S", g:0, t:1, s:2, def:80, skills:{"PunishDraw":2, "Crit Draw":1, "Water Res":-2, "Fire Res":4}},
+                {name:"Uragaan Leggings S", g:0, t:2, s:2, def:47, skills:{"PierceS Up":1, "Recoil":1, "Water Res":-3, "Fire Res":4}},
+                {name:"Dober Greaves", g:0, t:1, s:3, def:80, skills:{"Dragon Atk":1, "Evasion":1, "Hunger":-1, "Dragon Res":4}},
+                {name:"Dober Leggings", g:0, t:2, s:3, def:47, skills:{"Dragon Atk":1, "Evasion":1, "Hunger":-1, "Dragon Res":4}},
+                {name:"Jinouga Greaves S", g:0, t:1, s:0, def:81, skills:{"Awaken":5, "Thundr Atk":1, "Evade Dist":5, "Sense":-2}},
+                {name:"Jinouga Leggings S", g:0, t:2, s:0, def:47, skills:{"Awaken":5, "Thundr Atk":1, "Evade Dist":5, "Sense":-2}},
+                {name:"Diablos Greaves S", g:0, t:1, s:2, def:81, skills:{"Crit Draw":1, "Sheathe":3, "Quake Res":4, "Status":-1}},
+                {name:"Diablos Leggings S", g:0, t:2, s:2, def:47, skills:{"PierceS Up":1, "NormalSAdd":5, "Sheathe":2, "Status":-1}},
+                {name:"Tigrex Greaves S", g:0, t:1, s:0, def:81, skills:{"HearProtct":4, "Stamina":2, "Gluttony":5, "Protection":-2}},
+                {name:"Tigrex Leggings S", g:0, t:2, s:0, def:47, skills:{"HearProtct":4, "Stamina":3, "Gluttony":4, "Protection":-2}},
+                {name:"Agnaktor Greaves S", g:0, t:1, s:2, def:81, skills:{"Constitutn":4, "Sharpness":1, "Fire Atk":1, "Water Atk":-3}},
+                {name:"Agnaktor Leggings S", g:0, t:2, s:2, def:47, skills:{"NormalS Up":2, "Fire Atk":1, "Precision":4, "Water Atk":-2}},
+                {name:"Doboru Greaves S", g:0, t:1, s:1, def:81, skills:{"Slam":2, "Potential":1, "Attack":6, "Expert":-2}},
+                {name:"Doburu Leggings S", g:0, t:2, s:1, def:47, skills:{"Slam":1, "Potential":1, "Recoil":6, "Expert":-3}},
+                {name:"Qurupeco Greaves U", g:0, t:1, s:2, def:70, skills:{"Wide Area":5, "Eating":1, "Thundr Atk":1, "Ice Attack":-2}},
+                {name:"Qurupeco Leggings U", g:0, t:2, s:2, def:41, skills:{"Wide Area":4, "Eating":1, "Thundr Atk":1, "Ice Attack":-3}},
+                {name:"Ludroth Greaves U", g:0, t:1, s:1, def:71, skills:{"Stamina":3, "Status":5, "ThunderRes":-1, "FatigueAtk":2}},
+                {name:"Ludroth Leggings U", g:0, t:2, s:1, def:41, skills:{"Stamina":3, "Water Res":5, "ThunderRes":-1, "FatigueAtk":2}},
+                {name:"Barroth Greaves U", g:0, t:1, s:3, def:74, skills:{"KO":1, "Defense":3, "Fire Atk":-2, "FatigueAtk":1}},
+                {name:"Barroth Leggings U", g:0, t:2, s:3, def:43, skills:{"PierceS Up":1, "Ice Attack":1, "Defense":3, "Fire Atk":-2}},
+                {name:"Nebula Greaves U", g:0, t:1, s:1, def:77, skills:{"FastCharge":5, "Thundr Atk":3, "FatigueAtk":2, "Ice Attack":-1}},
+                {name:"Nebula Leggings U", g:0, t:2, s:1, def:45, skills:{"FastCharge":2, "Thundr Atk":4, "FatigueAtk":3, "Ice Attack":-2}},
+                {name:"Narga Greaves U", g:0, t:1, s:1, def:80, skills:{"Stamina":5, "Will Recov":2, "Perception":2, "Constitutn":-2}},
+                {name:"Narga Leggings U", g:0, t:2, s:0, def:47, skills:{"Stamina":5, "Will Recov":3, "Perception":3, "Constitutn":-2}},
+                {name:"Barioth Greaves U", g:0, t:1, s:3, def:80, skills:{"Evade Dist":2, "Constitutn":1, "Sense":2, "Evasion":-2}},
+                {name:"Barioth Leggings U", g:0, t:2, s:3, def:47, skills:{"Evade Dist":2, "Constitutn":1, "Sense":1, "Evasion":-3}},
+                {name:"Uragaan Greaves U", g:0, t:1, s:3, def:81, skills:{"Guard":2, "Will Recov":1, "BombStrUp":1, "Dragon Res":-3}},
+                {name:"Uragaan Leggings U", g:0, t:2, s:3, def:47, skills:{"PelletS Up":1, "BombStrUp":1, "Dragon Res":-3, "Reload Spd":2}},
+                {name:"Diablos Greaves U", g:0, t:1, s:3, def:84, skills:{"PunishDraw":3, "KO":1, "FatigueAtk":1, "Dragon Atk":-2}},
+                {name:"Diablos Leggings U", g:0, t:2, s:3, def:49, skills:{"Recoil":1, "Reload Spd":1, "NormalSAdd":3, "Dragon Atk":-2}},
+                {name:"Tigrex Greaves U", g:0, t:1, s:3, def:84, skills:{"HearProtct":2, "FastCharge":1, "Psychic":2, "Protection":-2}},
+                {name:"Tigrex Leggings U", g:0, t:2, s:3, def:49, skills:{"HearProtct":1, "FastCharge":1, "Psychic":3, "Protection":-2}},
+                {name:"Agnaktor Greaves U", g:0, t:1, s:1, def:84, skills:{"Guard":3, "Guard Up":2, "Ice Attack":5, "Fire Atk":-1}},
+                {name:"Agnaktor Leggings U", g:0, t:2, s:1, def:49, skills:{"Reload Spd":2, "Ice Attack":5, "PierceSAdd":3, "Fire Atk":-1}},
+                {name:"Golden Moon Greaves", g:0, t:1, s:0, def:84, skills:{"Slam":2, "Protection":5, "Fate":5, "ThunderRes":-1}},
+                {name:"Golden Moon Leggings", g:0, t:2, s:0, def:49, skills:{"Slam":3, "Protection":5, "Fate":4, "ThunderRes":-1}},
+                {name:"Silver Sol Greaves", g:0, t:1, s:3, def:84, skills:{"Debilitate":1, "Sharpness":2, "Attack":2, "Health":-2}},
+                {name:"Silver Sol Leggings", g:0, t:2, s:3, def:49, skills:{"Debilitate":2, "NormalS Up":1, "Attack":2, "Health":-2}},
+                {name:"Vangis Greaves", g:0, t:1, s:3, def:86, skills:{"Artisan":2, "Eating":2, "Ice Res":1, "Sharpness":-2}},
+                {name:"Vangis Leggings", g:0, t:2, s:3, def:50, skills:{"Loading":2, "Eating":2, "Ice Res":1, "Recoil":-2}},
+                {name:"Ranger Socks", g:0, t:1, s:0, def:77, skills:{"Carving":4, "Expert":4, "Rec Level":4, "Fate":-1}},
+                {name:"Scout Socks", g:0, t:2, s:0, def:45, skills:{"Carving":4, "Expert":4, "Rec Level":3, "Fate":-2}},
+                {name:"Guild Bard Boots S", g:1, t:1, s:0, def:74, skills:{"Rewards":5, "Perception":3, "Wide Area":4, "Fate":-1}},
+                {name:"Guild Bard Shoes S", g:1, t:2, s:0, def:43, skills:{"Rewards":3, "Perception":4, "Wide Area":4, "Fate":-2}},
+                {name:"Scholar Socks S", g:2, t:1, s:0, def:74, skills:{"Rewards":5, "Perception":3, "Wide Area":4, "Fate":-1}},
+                {name:"Scholar Sandals S", g:2, t:2, s:0, def:43, skills:{"Rewards":3, "Perception":4, "Wide Area":4, "Fate":-2}},
+                {name:"Nightmare Rais S", g:0, t:1, s:2, def:64, skills:{"FastCharge":2, "Evasion":4, "SpeedSetup":1, "Guard":-2}},
+                {name:"Nightmare Voulzer S", g:0, t:2, s:2, def:37, skills:{"FastCharge":1, "Evasion":3, "SpeedSetup":2, "Precision":-3}},
+                {name:"Viking Greaves S", g:0, t:1, s:2, def:70, skills:{"Sharpness":1, "Sheathe":2, "Sharpener":-3, "Rec Speed":3}},
+                {name:"Viking Leggings S", g:0, t:2, s:2, def:41, skills:{"NormalS Up":1, "Sheathe":2, "Reload Spd":-3, "Rec Speed":3}},
+                {name:"Rouage Gamba S", g:1, t:1, s:1, def:74, skills:{"HearProtct":1, "Expert":4, "Protection":-1, "Stun":5}},
+                {name:"Rouage Femur S", g:1, t:2, s:1, def:43, skills:{"HearProtct":1, "Expert":3, "Protection":-2, "Stun":5}},
+                {name:"Falmer Gamba S", g:2, t:1, s:1, def:74, skills:{"HearProtct":1, "Expert":4, "Protection":-1, "Stun":5}},
+                {name:"Falmer Femur S", g:2, t:2, s:1, def:43, skills:{"HearProtct":1, "Expert":3, "Protection":-2, "Stun":5}},
+                {name:"Atea Greaves S", g:0, t:1, s:1, def:77, skills:{"Fencing":4, "Guard Up":5, "Sharpener":-2}},
+                {name:"Atea Leggings S", g:0, t:2, s:1, def:45, skills:{"Rapid Fire":4, "Recoil":5, "Reload Spd":-2}},
+                {name:"Dianthus Shoes", g:2, t:1, s:1, def:70, skills:{"Wide Area":5, "Psychic":2, "Perception":2, "Poison":-2}},
+                {name:"Bellflower Shoes", g:2, t:2, s:1, def:41, skills:{"Wide Area":4, "Psychic":2, "Perception":2, "Poison":-3}},
+                {name:"Damascus Greaves", g:0, t:1, s:0, def:86, skills:{"Artisan":4, "Thundr Atk":3, "Sharpener":3, "Sharpness":-3}},
+                {name:"Damascus Leggings", g:0, t:2, s:0, def:50, skills:{"Loading":4, "PelletS Up":4, "Thundr Atk":2, "Recoil":-3}},
+                {name:"Hi Yamato Greaves", g:1, t:1, s:3, def:86, skills:{"FastCharge":2, "Fencing":1, "Expert":2, "Rec Speed":-2}},
+                {name:"Hi Courtier Greaves", g:1, t:2, s:3, def:50, skills:{"FastCharge":2, "PierceS Up":1, "Expert":2, "Rec Speed":-2}},
+                {name:"Hi Solar Pants", g:2, t:1, s:3, def:86, skills:{"FastCharge":2, "Fencing":1, "Expert":2, "Rec Speed":-2}},
+                {name:"Hi Divine Pants", g:2, t:2, s:3, def:50, skills:{"FastCharge":2, "PierceS Up":1, "Expert":2, "Rec Speed":-2}},
+                {name:"Dark Akantor Hessian", g:0, t:1, s:1, def:89, skills:{"Slam":1, "HearProtct":2, "Fire Atk":6, "Protection":-2}},
+                {name:"Dark Akantor Boots", g:0, t:2, s:1, def:52, skills:{"Slam":1, "HearProtct":2, "Fire Atk":6, "Protection":-2}},
+                {name:"Ukanlos Hessian", g:0, t:1, s:2, def:89, skills:{"Debilitate":3, "Fencing":3, "Ice Attack":2, "FastCharge":-1}},
+                {name:"Ukanlos Boots", g:0, t:2, s:2, def:52, skills:{"Debilitate":2, "Rapid Fire":2, "Ice Attack":3, "FastCharge":-2}},
+                {name:"Escadora Scale", g:0, t:1, s:3, def:89, skills:{"Elemental":2, "Blight Res":1, "Evade Dist":2, "Potential":-2}},
+                {name:"Escadora Scala", g:0, t:2, s:3, def:52, skills:{"Elemental":2, "Blight Res":1, "Evade Dist":3, "Potential":-1}},
+                {name:"Storm Pants", g:0, t:1, s:2, def:89, skills:{"Awaken":5, "Artisan":5, "Water Atk":1, "Eating":-2}},
+                {name:"Sky Leggings", g:0, t:2, s:2, def:52, skills:{"Awaken":5, "Loading":5, "Water Atk":1, "Eating":-2}},
+                {name:"Luxury Bath Sandals", g:0, t:0, s:1, def:47, skills:{"Fate":5, "LastingPwr":3, "Attack":-3}},
+                {name:"Crystals Anklets", g:0, t:0, s:3, def:37, skills:{}},
+                {name:"Black Leather Pants", g:0, t:1, s:1, def:82, skills:{"Potential":11}},
+                {name:"Black Leather Leggings", g:0, t:2, s:1, def:49, skills:{"Potential":11}},
+                {name:"Jolly Roger Boots", g:0, t:1, s:0, def:56, skills:{"Carving":3, "Fate":4, "Rewards":4, "Protection":-2}},
+                {name:"Jolly Roger Pants", g:0, t:2, s:0, def:32, skills:{"Carving":3, "Fate":4, "Rewards":2, "Protection":-4}},
+                {name:"Snake Boots", g:1, t:1, s:2, def:82, skills:{"FastCharge":2, "Constitutn":3, "SpeedSetup":2, "Hunger":-2}},
+                {name:"Snake Shoes", g:1, t:2, s:1, def:49, skills:{"Loading":3, "Precision":3, "SpeedSetup":2, "Hunger":-3}},
+                {name:"The Boss Boots", g:2, t:1, s:2, def:82, skills:{"Sense":2, "FastCharge":2, "Psychic":3, "Elemental":-2}},
+                {name:"The Boss Shoes", g:2, t:2, s:1, def:49, skills:{"Sense":2, "Loading":4, "Psychic":3, "Elemental":-2}},
+                {name:"Uniqlo Cargo Pants", g:0, t:1, s:2, def:82, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Uniqlo Cut Pants", g:0, t:2, s:2, def:49, skills:{"HearProtct":2, "Evade Dist":3, "Cold Res":2, "Eating":-2}},
+                {name:"Street Jeans", g:0, t:1, s:1, def:82, skills:{"Attack":5, "Will Recov":3, "Sense":-3}},
+                {name:"Street Denims", g:0, t:2, s:1, def:49, skills:{"Attack":5, "Will Recov":3, "Sense":-3}}
+            ],
+        };
+
+        // --- UI MANAGEMENT ---
+        let currentSkillInputs = 0;
+        const MAX_SKILLS = 7;
+
+        window.onload = function() {
+            populateTalismanDropdowns();
+            addTargetSkillInput();
+        };
+
+        function populateTalismanDropdowns() {
+            const selectors = document.querySelectorAll('.skill-selector');
+            const uniqueTrees = [...new Set(SKILL_DB.map(s => s.tree))].sort();
+            
+            selectors.forEach(sel => {
+                uniqueTrees.forEach(tree => {
+                    const opt = document.createElement('option');
+                    opt.value = tree;
+                    opt.textContent = tree;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function addTargetSkillInput() {
+            if (currentSkillInputs >= MAX_SKILLS) return;
+
+            const container = document.getElementById('targetSkillContainer');
+            currentSkillInputs++;
+            
+            const select = document.createElement('select');
+            select.className = "mhp3-input skill-target-selector mb-1 text-sm";
+            select.id = `targetSkillInput_${currentSkillInputs}`;
+            
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.textContent = `- Select Skill ${currentSkillInputs} (opsi) -`;
+            select.appendChild(defaultOpt);
+
+            // Sort skills alphabetically for easy finding
+            const sortedSkills = [...SKILL_DB].sort((a,b) => a.name.localeCompare(b.name));
+
+            sortedSkills.forEach(skill => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify({tree: skill.tree, points: skill.points, name: skill.name});
+                opt.textContent = skill.name;
+                select.appendChild(opt);
+            });
+
+            container.appendChild(select);
+            updateSkillCount();
+        }
+
+        function removeLastSkill() {
+            if (currentSkillInputs <= 0) return;
+            const container = document.getElementById('targetSkillContainer');
+            container.removeChild(container.lastChild);
+            currentSkillInputs--;
+            updateSkillCount();
+        }
+
+        function updateSkillCount() {
+            document.getElementById('skillCountDisplay').textContent = `${currentSkillInputs}/${MAX_SKILLS}`;
+            
+            const btnAdd = document.getElementById('btnAddSkill');
+            if(currentSkillInputs >= MAX_SKILLS) {
+                btnAdd.disabled = true;
+                btnAdd.classList.add('btn-disabled');
+            } else {
+                btnAdd.disabled = false;
+                btnAdd.classList.remove('btn-disabled');
+            }
+            
+            const btnDel = document.getElementById('btnDelSkill');
+             if(currentSkillInputs <= 0) {
+                btnDel.disabled = true;
+                btnDel.classList.add('btn-disabled');
+            } else {
+                btnDel.disabled = false;
+                btnDel.classList.remove('btn-disabled');
+            }
+        }
+
+        // --- 2. CORE CALCULATOR LOGIC ---
+
+        function generateSets() {
+            const resultArea = document.getElementById('resultsArea');
+            resultArea.innerHTML = '<div class="text-center mt-10">Searching Combinations...</div>';
+
+            const gender = parseInt(document.getElementById('gender').value);
+            const style = parseInt(document.getElementById('hunterStyle').value);
+            const weaponSlots = parseInt(document.getElementById('weaponSlots').value);
+            
+            const taliSkill1 = document.getElementById('talismanSkill1').value;
+            const taliVal1 = parseInt(document.getElementById('talismanVal1').value) || 0;
+            const taliSkill2 = document.getElementById('talismanSkill2').value;
+            const taliVal2 = parseInt(document.getElementById('talismanVal2').value) || 0;
+            const taliSlots = parseInt(document.getElementById('talismanSlots').value);
+
+            const targets = [];
+            document.querySelectorAll('.skill-target-selector').forEach(sel => {
+                if(sel.value) targets.push(JSON.parse(sel.value));
+            });
+
+            if(targets.length === 0) {
+                resultArea.innerHTML = '<div class="text-center text-red-600 font-bold mt-10">Pilih minimal satu skill target!</div>';
+                return;
+            }
+
+            const filterParts = (partList) => {
+                return partList.filter(p => 
+                    (p.g === 0 || p.g === gender) && 
+                    (p.t === 0 || p.t === style)
+                );
+            };
+
+            const helms = filterParts(ARMOR_DB.helm);
+            const plates = filterParts(ARMOR_DB.plate);
+            const gauntlets = filterParts(ARMOR_DB.gauntlet);
+            const waists = filterParts(ARMOR_DB.waist);
+            const boots = filterParts(ARMOR_DB.boots);
+
+            let validSets = [];
+            
+            for(let h of helms) {
+                for(let p of plates) {
+                    for(let g of gauntlets) {
+                        for(let w of waists) {
+                            for(let b of boots) {
+                                
+                                let currentSet = {
+                                    armor: [h, p, g, w, b],
+                                    skills: {},
+                                    slots: [0, 0, 0, 0], 
+                                    totalDef: h.def + p.def + g.def + w.def + b.def,
+                                    decorations: [],
+                                    freeSlots: 0
+                                };
+
+                                addSlots(currentSet.slots, weaponSlots);
+                                addSlots(currentSet.slots, taliSlots);
+
+                                currentSet.armor.forEach(part => {
+                                    addSlots(currentSet.slots, part.s);
+                                    for(let [k, v] of Object.entries(part.skills)) {
+                                        currentSet.skills[k] = (currentSet.skills[k] || 0) + v;
+                                    }
+                                });
+
+                                if(taliSkill1) currentSet.skills[taliSkill1] = (currentSet.skills[taliSkill1] || 0) + taliVal1;
+                                if(taliSkill2) currentSet.skills[taliSkill2] = (currentSet.skills[taliSkill2] || 0) + taliVal2;
+
+                                let possible = true;
+                                let neededDecorations = [];
+                                let availableSlots = [...currentSet.slots]; 
+
+                                for(let target of targets) {
+                                    const currentPoints = currentSet.skills[target.tree] || 0;
+                                    let missing = target.points - currentPoints;
+                                    // Handle negative skill requirements if needed, but usually we want >= points
+                                    // If target is negative (e.g. Attack Down), we need <= points. 
+                                    // Simplified logic: We only "fill" positive requirements.
+                                    
+                                    if(missing > 0) {
+                                        const decoResult = solveDecorations(target.tree, missing, availableSlots);
+                                        if(decoResult.success) {
+                                            neededDecorations.push(...decoResult.decos);
+                                            currentSet.skills[target.tree] = (currentSet.skills[target.tree] || 0) + decoResult.pointsAdded;
+                                        } else {
+                                            possible = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if(possible) {
+                                    // Check if we accidentally activated negative skills or didn't meet exact thresholds?
+                                    // For now, assume "at least" points is enough.
+                                    currentSet.decorations = neededDecorations;
+                                    currentSet.freeSlots = availableSlots[1] + availableSlots[2] + availableSlots[3];
+                                    currentSet.activeSkillNames = getActivatedSkillsList(currentSet.skills);
+                                    validSets.push(currentSet);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const sortMode = document.getElementById('sortBy').value;
+            if(sortMode === 'defense') {
+                validSets.sort((a,b) => b.totalDef - a.totalDef);
+            } else {
+                validSets.sort((a,b) => b.freeSlots - a.freeSlots);
+            }
+
+            renderResults(validSets.slice(0, 20), taliSkill1, taliVal1, taliSkill2, taliVal2, taliSlots);
+        }
+
+        function addSlots(slotArray, count) {
+            if(count === 1) slotArray[1]++;
+            if(count === 2) slotArray[2]++;
+            if(count === 3) slotArray[3]++;
+        }
+
+        function solveDecorations(skillTree, missingPoints, slotsAvailable) {
+            // Find jewels for this tree that give positive points
+            const jewels = DECORATIONS.filter(d => (d.skills[skillTree] || 0) > 0);
+            // Sort by points descending
+            jewels.sort((a,b) => b.skills[skillTree] - a.skills[skillTree]);
+
+            let added = [];
+            let pointsNeeded = missingPoints;
+            let totalAdded = 0;
+
+            let loopLimit = 20; 
+            while(pointsNeeded > 0 && loopLimit > 0) {
+                loopLimit--;
+                let jewelFound = false;
+
+                for(let jewel of jewels) {
+                    const pts = jewel.skills[skillTree];
+                    const slotReq = jewel.slots;
+
+                    let slotToUse = -1;
+                    if(slotReq === 3 && slotsAvailable[3] > 0) slotToUse = 3;
+                    else if(slotReq === 2) {
+                        if(slotsAvailable[2] > 0) slotToUse = 2;
+                        else if(slotsAvailable[3] > 0) slotToUse = 3;
+                    }
+                    else if(slotReq === 1) {
+                        if(slotsAvailable[1] > 0) slotToUse = 1;
+                        else if(slotsAvailable[2] > 0) slotToUse = 2;
+                        else if(slotsAvailable[3] > 0) slotToUse = 3;
+                    }
+
+                    if(slotToUse !== -1) {
+                        slotsAvailable[slotToUse]--;
+                        pointsNeeded -= pts;
+                        totalAdded += pts;
+                        added.push(jewel.name);
+                        jewelFound = true;
+                        if(pointsNeeded <= 0) break; 
+                    }
+                }
+                if(!jewelFound) return { success: false };
+            }
+
+            if(pointsNeeded > 0) return { success: false };
+            return { success: true, decos: added, pointsAdded: totalAdded };
+        }
+
+        function getActivatedSkillsList(finalSkills) {
+            let activated = [];
+            // Get unique trees from DB
+            const allTrees = [...new Set(SKILL_DB.map(s=>s.tree))];
+
+            for (let tree of allTrees) {
+                let points = finalSkills[tree] || 0;
+                if(points === 0) continue;
+
+                let possibleSkills = SKILL_DB.filter(s => s.tree === tree);
+                
+                let active = null;
+                if(points > 0) {
+                    // Positive skills: find the highest threshold <= points
+                    let posSkills = possibleSkills.filter(s => s.points > 0).sort((a,b) => b.points - a.points);
+                    active = posSkills.find(s => points >= s.points);
+                } else {
+                    // Negative skills: find the "highest" negative (e.g. -20) >= points (e.g. -21)
+                    // Wait, logic: if I have -15 points, I trigger -10 and -15. Usually only strongest applies.
+                    // Sort negatives: -10, -15, -20.
+                    let negSkills = possibleSkills.filter(s => s.points < 0).sort((a,b) => a.points - b.points); // -20, -15, -10
+                    active = negSkills.find(s => points <= s.points);
+                }
+
+                if(active) activated.push(active.name);
+            }
+            return activated;
+        }
+
+        function renderResults(sets, tSkill1, tVal1, tSkill2, tVal2, tSlot) {
+            const container = document.getElementById('resultsArea');
+            if(sets.length === 0) {
+                container.innerHTML = '<div class="text-center font-bold mt-10">Tidak ada kombinasi ditemukan.<br>Coba kurangi skill atau periksa database.</div>';
+                return;
+            }
+
+            let html = `<div class="mb-2 font-bold text-black">Found ${sets.length} matches (Top 20)</div>`;
+            
+            sets.forEach((set, index) => {
+                const decoCounts = {};
+                set.decorations.forEach(d => decoCounts[d] = (decoCounts[d] || 0) + 1);
+                let decoStr = Object.entries(decoCounts).map(([name, count]) => `- ${name} = ${count}x`).join('<br>');
+                if(!decoStr) decoStr = "- None";
+
+                let talismanStr = "None";
+                let tParts = [];
+                if(tSkill1 && tVal1) tParts.push(`${tSkill1} +${tVal1}`);
+                if(tSkill2 && tVal2) tParts.push(`${tSkill2} +${tVal2}`);
+                if(tParts.length > 0) {
+                    talismanStr = tParts.join(", ") + ` (Slots: ${tSlot})`;
+                } else if (tSlot > 0) {
+                    talismanStr = `No Skill (Slots: ${tSlot})`;
+                }
+
+                html += `
+                <div class="result-card">
+                    <div class="font-bold text-lg mb-1">#${index+1}</div>
+                    
+                    <div>• Talisman: ${talismanStr}</div>
+                    <div>• Armor:</div>
+                    <ul class="list-none pl-0 m-0">
+                        ${set.armor.map(p => `<li>- ${p.name}</li>`).join('')}
+                    </ul>
+                    
+                    <div class="dashed-line">----------------------</div>
+                    
+                    <div>• Decorations:</div>
+                    <div class="">${decoStr}</div>
+                    
+                    <div class="dashed-line">----------------------</div>
+
+                    <div>• Skill Achieved:</div>
+                    <ul class="list-none pl-0 m-0">
+                        ${set.activeSkillNames.map(s => `<li>- ${s}</li>`).join('')}
+                    </ul>
+
+                    <div class="mt-4 font-bold text-gray-800">• Other Stats:</div>
+                    <div class="">
+                        - Defense: ${set.totalDef}<br>
+                        - Free slots: ${set.freeSlots} (Sisa slot kosong)
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+    </script>
+</body>
+</html>
